@@ -687,7 +687,7 @@ class _SearchResultState extends State<SearchResult> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                          padding: EdgeInsets.fromLTRB(0, 0, 0, 100),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -703,12 +703,17 @@ class _SearchResultState extends State<SearchResult> {
                                       launch(
                                           'https://www.bookfinder.com/isbn/$_isbn/');
                                     },
+                                    style: ButtonStyle(
+                                      padding: MaterialStateProperty.all(EdgeInsets.all(12)),
+                                    ),
                                     child: Text(
                                       "Search Bookfinder",
                                       style: TextStyle(
                                         fontWeight: FontWeight.w400,
                                         fontStyle: FontStyle.normal,
                                       ),
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
                                     ),
                                   ),
                                 ),
@@ -723,27 +728,21 @@ class _SearchResultState extends State<SearchResult> {
                                       launch(
                                           'https://www.abebooks.com/servlet/SearchResults?kn=$_isbn');
                                     },
+                                    style: ButtonStyle(
+                                      padding: MaterialStateProperty.all(EdgeInsets.all(12)),
+                                    ),
                                     child: Text(
                                       "Search Abebooks",
                                       style: TextStyle(
                                         fontWeight: FontWeight.w400,
                                         fontStyle: FontStyle.normal,
                                       ),
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
                                     ),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 0, 100),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-
                               Expanded(
                                 flex: 1,
                                 child: Padding(
@@ -754,12 +753,17 @@ class _SearchResultState extends State<SearchResult> {
                                       launch(
                                           'https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews');
                                     },
+                                    style: ButtonStyle(
+                                      padding: MaterialStateProperty.all(EdgeInsets.all(12)),
+                                    ),
                                     child: Text(
-                                      "Search Findit@Flinders",
+                                      "Search Findit\u200b@Flinders",
                                       style: TextStyle(
                                         fontWeight: FontWeight.w400,
                                         fontStyle: FontStyle.normal,
                                       ),
+                                      maxLines: 3,
+                                      textAlign: TextAlign.center,
                                     ),
                                   ),
                                 ),
