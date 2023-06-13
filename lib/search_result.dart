@@ -554,85 +554,90 @@ class _SearchResultState extends State<SearchResult> {
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
+                child: Column(
                   children: [
-                    Expanded(
-                      flex: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 0, horizontal: 10),
-                        child: FilledButton(
-                          onPressed: () {
-                            launch(
-                                'https://www.bookfinder.com/isbn/$_isbn/');
-                          },
-                          style: ButtonStyle(
-                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
-                          ),
-                          child: const Text(
-                            "Search Bookfinder",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.normal,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                            child: FilledButton(
+                              onPressed: () {
+                                launch('https://www.bookfinder.com/isbn/$_isbn/');
+                              },
+                              style: ButtonStyle(
+                                padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                              ),
+                              child: const Text(
+                                "Search Bookfinder",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontStyle: FontStyle.normal,
+                                ),
+                                maxLines: 2,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                            maxLines: 2,
-                            textAlign: TextAlign.center,
                           ),
                         ),
-                      ),
+                        Expanded(
+                          flex: 1,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                            child: FilledButton(
+                              onPressed: () {
+                                launch('https://www.abebooks.com/servlet/SearchResults?kn=$_isbn');
+                              },
+                              style: ButtonStyle(
+                                padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                              ),
+                              child: const Text(
+                                "Search Abebooks",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontStyle: FontStyle.normal,
+                                ),
+                                maxLines: 2,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 0, horizontal: 10),
-                        child: FilledButton(
-                          onPressed: () {
-                            launch(
-                                'https://www.abebooks.com/servlet/SearchResults?kn=$_isbn');
-                          },
-                          style: ButtonStyle(
-                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
-                          ),
-                          child: const Text(
-                            "Search Abebooks",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.normal,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                            child: FilledButton(
+                              onPressed: () {
+                                launch('https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews');
+                              },
+                              style: ButtonStyle(
+                                padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                              ),
+                              child: const Text(
+                                "Search Findit\u200b@Flinders",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontStyle: FontStyle.normal,
+                                ),
+                                maxLines: 3,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                            maxLines: 2,
-                            textAlign: TextAlign.center,
                           ),
                         ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 0, horizontal: 10),
-                        child: FilledButton(
-                          onPressed: () {
-                            launch(
-                                'https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews');
-                          },
-                          style: ButtonStyle(
-                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
-                          ),
-                          child: const Text(
-                            "Search Findit\u200b@Flinders",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.normal,
-                            ),
-                            maxLines: 3,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
