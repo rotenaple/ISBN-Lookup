@@ -43,4 +43,19 @@ class IsbnCheck {
 
     return false; // Invalid ISBN length
   }
+
+  String convertIsbn10ToIsbn13(String isbn10) {
+    isbn10 = isbn10.replaceAll('-', ''); // Remove dashes from ISBN-10
+
+      String isbn13 = "978${isbn10.substring(0, 9)}";
+      int sum = 0;
+      for (int i = 0; i < isbn13.length; i++) {
+        int digit = int.parse(isbn13[i]);
+        sum += (i % 2 == 0) ? digit : digit * 3;
+      }
+      int checkDigit = 10 - (sum % 10);
+      isbn13 += checkDigit.toString();
+      return isbn13;
+
+  }
 }

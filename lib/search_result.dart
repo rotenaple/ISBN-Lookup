@@ -8,7 +8,8 @@ import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:xml2json/xml2json.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import 'isbn_check.dart';
 
 class SearchResult extends StatefulWidget {
   final String isbn;
@@ -35,24 +36,50 @@ class _SearchResultState extends State<SearchResult> {
     super.initState();
     search(widget.isbn);
   }
+
+  bool _isSearchCompleted = false;
+
   void search(String isbn) async {
     _isbn = isbn;
 
-    //await classifyAPILookup();
-    await openLibraryLookup();
-    await googleBooksAPILookup();
-    await abeBooksAPILookup();
+    if (_isbn.length == 10) {
+      String isbn13 = IsbnCheck().convertIsbn10ToIsbn13(_isbn);
 
-    if (_coverlink == "") {
-      _coverlink = "https://pictures.abebooks.com/isbn/$_isbn.jpg";
+      //await classifyAPILookup(_isbn);
+      await openLibraryLookup(_isbn);
+      await googleBooksAPILookup(_isbn);
+      await abeBooksAPILookup(_isbn);
+
+      //await classifyAPILookup(isbn13);
+      await openLibraryLookup(isbn13);
+      await googleBooksAPILookup(isbn13);
+      await abeBooksAPILookup(isbn13);
+
+    } else if (_isbn.length == 13) {
+
+      //await classifyAPILookup(_isbn);
+      await openLibraryLookup(_isbn);
+      await googleBooksAPILookup(_isbn);
+      await abeBooksAPILookup(_isbn);
+
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(milliseconds: 500),
+          content: Text('Invalid ISBN'),
+        ),
+      );
+      return;
     }
 
     writeToCsv(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
+    _isSearchCompleted = true;
+    setState(() {});
   }
 
-  Future<void> classifyAPILookup() async {
+  Future<void> classifyAPILookup(String isbn) async {
     String url =
-        "http://classify.oclc.org/classify2/Classify?isbn=$_isbn&summary=true";
+        "http://classify.oclc.org/classify2/Classify?isbn=$isbn&summary=true";
     http.Response response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -101,8 +128,8 @@ class _SearchResultState extends State<SearchResult> {
     }
   }
 
-  Future<void> openLibraryLookup() async {
-    String url = "https://openlibrary.org/isbn/$_isbn.json";
+  Future<void> openLibraryLookup(String isbn) async {
+    String url = "https://openlibrary.org/isbn/$isbn.json";
     http.Response response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -146,8 +173,8 @@ class _SearchResultState extends State<SearchResult> {
     }
   }
 
-  Future<void> googleBooksAPILookup() async {
-    String url = "https://www.googleapis.com/books/v1/volumes?q=isbn:$_isbn";
+  Future<void> googleBooksAPILookup(String isbn) async {
+    String url = "https://www.googleapis.com/books/v1/volumes?q=isbn:$isbn";
     http.Response response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -187,12 +214,12 @@ class _SearchResultState extends State<SearchResult> {
     }
   }
 
-  Future<void> abeBooksAPILookup() async {
+  Future<void> abeBooksAPILookup(String isbn) async {
     final url = Uri.parse('https://www.abebooks.com/servlet/DWRestService/pricingservice');
     final payload = {
       'action': 'getPricingDataByISBN',
-      'isbn': _isbn,
-      'container': 'pricingService-$_isbn'
+      'isbn': isbn,
+      'container': 'pricingService-$isbn'
     };
 
     final response = await http.post(url, body: payload);
@@ -226,6 +253,9 @@ class _SearchResultState extends State<SearchResult> {
         if (bookNew != null && _bookNew == "") _bookNew = bookNew;
         if (bookUsed != null && _bookUsed == "") _bookUsed = bookUsed;
         if (destination != null && _destination == "") _destination = destination;
+        if (_coverlink == "") {
+          _coverlink = "https://pictures.abebooks.com/isbn/$_isbn.jpg";
+        }
       });
 
       if (kDebugMode) {
@@ -279,383 +309,393 @@ class _SearchResultState extends State<SearchResult> {
   }
 
   @override
+  Future<void> _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color(0xffffffff),
-        body: SafeArea(
+      backgroundColor: const Color(0xffffffff),
+      body: SafeArea(
           child: Column(
-              children: [
+            children: [
               if (_coverlink.isNotEmpty)
-          Expanded(
-          flex: 5,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Align(
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.5),
-                    BlendMode.darken,
-                  ),
-                  child: Image.network(
-                    _coverlink,
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    fit: BoxFit.fitWidth,
+                Expanded(
+                  flex: 5,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Align(
+                        child: ColorFiltered(
+                          colorFilter: ColorFilter.mode(
+                            Colors.black.withOpacity(0.5),
+                            BlendMode.darken,
+                          ),
+                          child: Image.network(
+                            _coverlink,
+                            height: MediaQuery.of(context).size.height,
+                            width: MediaQuery.of(context).size.width,
+                            fit: BoxFit.fitWidth,
+                          ),
+                        ),
+                      ),
+                      Align(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                          child: Image.network(
+                            _coverlink,
+                            height: MediaQuery.of(context).size.height,
+                            width: MediaQuery.of(context).size.width,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              Align(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                  child: Image.network(
-                    _coverlink,
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (_title.isNotEmpty)
-    Expanded(
-      flex: 12,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: [
               if (_title.isNotEmpty)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
-                    child: Text(
-                      _title,
-                      textAlign: TextAlign.start,
-                      overflow: TextOverflow.clip,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontStyle: FontStyle.normal,
-                        fontSize: 24,
-                        color: Color(0xff000000),
-                      ),
-                    ),
-                  ),
-                ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        if (_authors.isNotEmpty)
-                          Text(
-                            _authors,
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.normal,
-                              color: Color(0xff000000),
-                            ),
-                          ),
-                        if (_publisher.isNotEmpty)
-                          Text(
-                            _publisher,
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontStyle: FontStyle.normal,
-                              color: Color(0xff000000),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  if (_publicationYear.isNotEmpty)
-                    Text(
-                      _publicationYear,
-                      textAlign: TextAlign.start,
-                      overflow: TextOverflow.clip,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.normal,
-                        color: Color(0xff000000),
-                      ),
-                    ),
-                ],
-              ),
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-                padding: const EdgeInsets.all(0),
-                width: MediaQuery.of(context).size.width,
-                height: 1,
-                decoration: BoxDecoration(
-                  color: const Color(0x1f000000),
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.zero,
-                  border: Border.all(color: const Color(0x4d9e9e9e), width: 1),
-                ),
-              ),
-              if (_description.isNotEmpty)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    _description,
-                    textAlign: TextAlign.start,
-                    overflow: TextOverflow.clip,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.normal,
-                      color: Color(0xff000000),
-                    ),
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Expanded(
-                      flex: 1,
+                Expanded(
+                  flex: 12,
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          const Text(
-                            "ISBN",
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.clip,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontStyle: FontStyle.normal,
-                              color: Color(0xff000000),
+                          if (_title.isNotEmpty)
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
+                                child: Text(
+                                  _title,
+                                  textAlign: TextAlign.start,
+                                  overflow: TextOverflow.clip,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontStyle: FontStyle.normal,
+                                    fontSize: 24,
+                                    color: Color(0xff000000),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    if (_authors.isNotEmpty)
+                                      Text(
+                                        _authors,
+                                        textAlign: TextAlign.start,
+                                        overflow: TextOverflow.clip,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          fontStyle: FontStyle.normal,
+                                          color: Color(0xff000000),
+                                        ),
+                                      ),
+                                    if (_publisher.isNotEmpty)
+                                      Text(
+                                        _publisher,
+                                        textAlign: TextAlign.start,
+                                        overflow: TextOverflow.clip,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontStyle: FontStyle.normal,
+                                          color: Color(0xff000000),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              if (_publicationYear.isNotEmpty)
+                                Text(
+                                  _publicationYear,
+                                  textAlign: TextAlign.start,
+                                  overflow: TextOverflow.clip,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontStyle: FontStyle.normal,
+                                    color: Color(0xff000000),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          Container(
+                            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+                            padding: const EdgeInsets.all(0),
+                            width: MediaQuery.of(context).size.width,
+                            height: 1,
+                            decoration: BoxDecoration(
+                              color: const Color(0x1f000000),
+                              shape: BoxShape.rectangle,
+                              borderRadius: BorderRadius.zero,
+                              border: Border.all(color: const Color(0x4d9e9e9e), width: 1),
                             ),
                           ),
-                          Text(
-                            _isbn,
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.normal,
-                              color: Color(0xff000000),
+                          if (_description.isNotEmpty)
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                _description,
+                                textAlign: TextAlign.start,
+                                overflow: TextOverflow.clip,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontStyle: FontStyle.normal,
+                                  color: Color(0xff000000),
+                                ),
+                              ),
+                            ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Expanded(
+                                  flex: 1,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      const Text(
+                                        "ISBN",
+                                        textAlign: TextAlign.start,
+                                        overflow: TextOverflow.clip,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontStyle: FontStyle.normal,
+                                          color: Color(0xff000000),
+                                        ),
+                                      ),
+                                      Text(
+                                        _isbn,
+                                        textAlign: TextAlign.start,
+                                        overflow: TextOverflow.clip,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          fontStyle: FontStyle.normal,
+                                          color: Color(0xff000000),
+                                        ),
+                                      ),
+                                      const Padding(
+                                        padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                                        child: Text(
+                                          "New Price",
+                                          textAlign: TextAlign.start,
+                                          overflow: TextOverflow.clip,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontStyle: FontStyle.normal,
+                                            color: Color(0xff000000),
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        "US\$ $_bookNew",
+                                        textAlign: TextAlign.start,
+                                        overflow: TextOverflow.clip,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          fontStyle: FontStyle.normal,
+                                          color: Color(0xff000000),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 1,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      const Text(
+                                        "DDC",
+                                        textAlign: TextAlign.start,
+                                        overflow: TextOverflow.clip,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontStyle: FontStyle.normal,
+                                          color: Color(0xff000000),
+                                        ),
+                                      ),
+                                      Text(
+                                        _ddc,
+                                        textAlign: TextAlign.start,
+                                        overflow: TextOverflow.clip,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          fontStyle: FontStyle.normal,
+                                          color: Color(0xff000000),
+                                        ),
+                                      ),
+                                      const Padding(
+                                        padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                                        child: Text(
+                                          "Used Price",
+                                          textAlign: TextAlign.start,
+                                          overflow: TextOverflow.clip,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontStyle: FontStyle.normal,
+                                            color: Color(0xff000000),
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        "US\$ $_bookUsed",
+                                        textAlign: TextAlign.start,
+                                        overflow: TextOverflow.clip,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          fontStyle: FontStyle.normal,
+                                          color: Color(0xff000000),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 0),
                             child: Text(
-                              "New Price",
+                              "Prices from Abebooks, Shipping to $_destination",
                               textAlign: TextAlign.start,
                               overflow: TextOverflow.clip,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontStyle: FontStyle.normal,
                                 color: Color(0xff000000),
                               ),
                             ),
                           ),
-                          Text(
-                            "US\$ $_bookNew",
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.normal,
-                              color: Color(0xff000000),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Expanded(
+                                      flex: 1,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                                        child: FilledButton(
+                                          onPressed: () {
+                                            launch('https://www.bookfinder.com/isbn/$_isbn/');
+                                          },
+                                          style: ButtonStyle(
+                                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                          ),
+                                          child: const Text(
+                                            "Search Bookfinder",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontStyle: FontStyle.normal,
+                                            ),
+                                            maxLines: 2,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 1,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                                        child: FilledButton(
+                                          onPressed: () {
+                                            launch('https://www.abebooks.com/servlet/SearchResults?kn=$_isbn');
+                                          },
+                                          style: ButtonStyle(
+                                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                          ),
+                                          child: const Text(
+                                            "Search Abebooks",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontStyle: FontStyle.normal,
+                                            ),
+                                            maxLines: 2,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Expanded(
+                                      flex: 1,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                                        child: FilledButton(
+                                          onPressed: () {
+                                            launch('https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews');
+                                          },
+                                          style: ButtonStyle(
+                                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                          ),
+                                          child: const Text(
+                                            "Search Findit\u200b@Flinders",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontStyle: FontStyle.normal,
+                                            ),
+                                            maxLines: 3,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          const Text(
-                            "DDC",
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.clip,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontStyle: FontStyle.normal,
-                              color: Color(0xff000000),
-                            ),
-                          ),
-                          Text(
-                            _ddc,
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.normal,
-                              color: Color(0xff000000),
-                            ),
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                            child: Text(
-                              "Used Price",
-                              textAlign: TextAlign.start,
-                              overflow: TextOverflow.clip,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontStyle: FontStyle.normal,
-                                color: Color(0xff000000),
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "US\$ $_bookUsed",
-                            textAlign: TextAlign.start,
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.normal,
-                              color: Color(0xff000000),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 0),
-                child: Text(
-                  "Prices from Abebooks, Shipping to $_destination",
-                  textAlign: TextAlign.start,
-                  overflow: TextOverflow.clip,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontStyle: FontStyle.normal,
-                    color: Color(0xff000000),
                   ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
-                            child: FilledButton(
-                              onPressed: () {
-                                launch('https://www.bookfinder.com/isbn/$_isbn/');
-                              },
-                              style: ButtonStyle(
-                                padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
-                              ),
-                              child: const Text(
-                                "Search Bookfinder",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.normal,
-                                ),
-                                maxLines: 2,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
-                            child: FilledButton(
-                              onPressed: () {
-                                launch('https://www.abebooks.com/servlet/SearchResults?kn=$_isbn');
-                              },
-                              style: ButtonStyle(
-                                padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
-                              ),
-                              child: const Text(
-                                "Search Abebooks",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.normal,
-                                ),
-                                maxLines: 2,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
-                            child: FilledButton(
-                              onPressed: () {
-                                launch('https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews');
-                              },
-                              style: ButtonStyle(
-                                padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
-                              ),
-                              child: const Text(
-                                "Search Findit\u200b@Flinders",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.normal,
-                                ),
-                                maxLines: 3,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+                )
             ],
-          ),
-        ),
+          )),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Navigate back to the main page
+          Navigator.popUntil(context, ModalRoute.withName('/'));
+        },
+        child: const Icon(Icons.arrow_back),
       ),
-    )
-      ],
-    )),
-    floatingActionButton: FloatingActionButton(
-    onPressed: () {
-    // Navigate back to the main page
-    Navigator.popUntil(context, ModalRoute.withName('/'));
-    },
-    child: const Icon(Icons.arrow_back),
-    ),
     );
   }
+
 }

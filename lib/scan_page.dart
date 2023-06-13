@@ -100,7 +100,7 @@ class _ScanPageState extends State<ScanPage> {
       floatingActionButton: Platform.isAndroid || Platform.isIOS
           ? FloatingActionButton(
         onPressed: () {},
-        child: IconButton(
+          child: IconButton(
           icon: const Icon(Icons.keyboard),
           onPressed: () {
             Navigator.pop(context);
