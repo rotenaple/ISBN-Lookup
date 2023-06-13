@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 
 class CustomKeyboard extends StatelessWidget {
   final Function(String) onKeyPressed;
@@ -49,6 +50,7 @@ class CustomKeyboard extends StatelessWidget {
         onPressed: () {
           if (_isValidInput(digit)) {
             onKeyPressed(digit);
+            _vibrateOnKeyPress();
           }
         },
       ),
@@ -64,9 +66,16 @@ class CustomKeyboard extends StatelessWidget {
         ),
         onPressed: () {
           onKeyPressed('backspace');
+          _vibrateOnKeyPress();
         },
       ),
     );
+  }
+
+  Future<void> _vibrateOnKeyPress() async {
+    if (await Vibrate.canVibrate) {
+      Vibrate.feedback(FeedbackType.medium); // Vibrate with light feedback
+    }
   }
 
   bool _isValidInput(String digit) {
