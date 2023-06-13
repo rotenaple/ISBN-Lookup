@@ -1,6 +1,6 @@
 class IsbnUtils {
   static bool isValidIsbn(String isbn) {
-    if (isbn == null) {
+    if (isbn == "") {
       return false;
     }
     isbn = isbn.replaceAll('-', '').replaceAll(' ', ''); // remove dashes and spaces

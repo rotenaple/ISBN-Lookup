@@ -14,7 +14,6 @@ class CustomKeyboard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            buildInputDisplay(),
             buildKeyboardRow(['1', '2', '3']),
             buildKeyboardRow(['4', '5', '6']),
             buildKeyboardRow(['7', '8', '9']),
@@ -25,11 +24,6 @@ class CustomKeyboard extends StatelessWidget {
     );
   }
 
-  Widget buildInputDisplay() {
-    return Text(
-      '', // Replace with your desired input display logic
-    );
-  }
 
   Widget buildKeyboardRow(List<dynamic> keys) {
     return Row(
@@ -50,7 +44,7 @@ class CustomKeyboard extends StatelessWidget {
       child: TextButton(
         child: Text(
           digit,
-          style: TextStyle(fontSize: 24.0),
+          style: const TextStyle(fontSize: 24.0),
         ),
         onPressed: () {
           if (_isValidInput(digit)) {
@@ -64,7 +58,7 @@ class CustomKeyboard extends StatelessWidget {
   Widget buildBackspaceButton() {
     return Expanded(
       child: TextButton(
-        child: Icon(
+        child: const Icon(
           Icons.backspace,
           size: 24.0,
         ),
@@ -77,7 +71,7 @@ class CustomKeyboard extends StatelessWidget {
 
   bool _isValidInput(String digit) {
     // Only allow digits from 0 to 9 and the letter X
-    return RegExp(r'^[0-9X]$').hasMatch(digit);
+    return RegExp(r'^[\dX]$').hasMatch(digit);
   }
 }
 
@@ -95,7 +89,7 @@ class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         border: OutlineInputBorder(),
         labelText: 'Input ISBN Here',
         floatingLabelAlignment: FloatingLabelAlignment.center,
@@ -104,7 +98,7 @@ class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
       maxLength: 13,
       keyboardType: TextInputType.text,
       inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9Xx]')),
+        FilteringTextInputFormatter.allow(RegExp(r'[\dXx]')),
       ],
       autocorrect: false,
       enableInteractiveSelection: false,
@@ -125,7 +119,7 @@ class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
             canvasColor: Colors.transparent, // Set the background color to transparent
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.0),
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
             child: IntrinsicHeight(
               child: Container(
                 color: Colors.white,

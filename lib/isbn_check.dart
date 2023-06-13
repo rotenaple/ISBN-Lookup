@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class IsbnCheck {
   bool isValidIsbnFormat(String isbn) {
     isbn = isbn.replaceAll('-', ''); // Remove dashes from ISBN
@@ -16,7 +18,9 @@ class IsbnCheck {
 
       bool isValid = (isbn[9] == 'X' && checkDigit == 10) || (checkDigit == int.parse(isbn[9]));
 
-      print("checkdigit matches: " + isValid.toString());
+      if (kDebugMode) {
+        print("check digit matches: $isValid");
+      }
       return isValid;
     } else if (isbn.length == 13) {
       // ISBN-13 check digit calculation
@@ -31,7 +35,9 @@ class IsbnCheck {
 
       bool isValid = checkDigit == int.parse(isbn[12]);
 
-      print("checkdigit matches: " + isValid.toString());
+      if (kDebugMode) {
+        print("check digit matches: $isValid");
+      }
       return isValid;
     }
 
