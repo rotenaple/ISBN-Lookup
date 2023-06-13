@@ -1,25 +1,28 @@
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:isbn_book_search_test_flutter/isbn_check.dart';
 import 'dart:ui';
 import 'dart:io';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:isbn_book_search_test_flutter/utils.dart';
-import 'package:isbn_book_search_test_flutter/result_text_view.dart';
-import 'package:xml2json/xml2json.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:path_provider/path_provider.dart';
 
+import 'custom_keyboard.dart';
 
 void main() => runApp(MaterialApp(home: Home()));
 
 class Home extends StatelessWidget {
-  final isbnController = TextEditingController();
+  final TextEditingController isbnController = TextEditingController();
 
   void search(BuildContext context, String isbn) {
-    if (isbn.length == 10 || isbn.length == 13) {
-      if (IsbnUtils.isValidIsbn(isbn)) {
+      IsbnCheck checker = IsbnCheck();
+      bool check = checker.isValidIsbnFormat(isbn);
+      if (check) {
         // Use the isValidIsbn method from IsbnUtils class
         // Navigate to the result page
         Navigator.push(
@@ -35,81 +38,85 @@ class Home extends StatelessWidget {
           ),
         );
       }
-    } else {
-      // Show an error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: Duration(milliseconds: 500),
-          content:
-              Text('Invalid ISBN length. Please enter a 10 or 13 digit ISBN.'),
-        ),
-      );
     }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-          child: Row(
-        children: <Widget>[
-          Expanded(
-            flex: 1, // 20%
-            child: Container(),
-          ),
-          Expanded(
-            flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                TextField(
-                  controller: isbnController,
-                  // add this controller
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Input ISBN Here',
-                    floatingLabelAlignment: FloatingLabelAlignment.center,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLength: 13,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  autocorrect: false,
-                ),
-                FilledButton(
-                  onPressed: () {
-                    String isbn = isbnController.text;
-                    search(context,
-                        isbn); // Pass the context parameter to the search method
-                  },
-                  child: const Text('Search'),
-                ),
-              ],
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              flex: 1,
+              child: Container(),
             ),
-          ),
-          Expanded(
-            flex: 1, // 20%
-            child: Container(),
-          )
-        ],
-      )),
-      floatingActionButton: Platform.isAndroid || Platform.isIOS
-          ? FloatingActionButton(
-              onPressed: () {},
-              child: IconButton(
-                  icon: SvgPicture.asset('images/barcode_scanner.svg',
-                      colorFilter:
-                          ColorFilter.mode(Colors.white, BlendMode.srcIn)),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ScanPage()),
-                    );
-                  }),
-            )
-          : null,
-    );
+            Expanded(
+              flex: 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  CustomKeyboardTextField(controller: isbnController),
+                  FilledButton(
+                    onPressed: () {
+                      String isbn = isbnController.text;
+                      search(context, isbn);
+                    },
+                    child: const Text('Search'),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  FloatingActionButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ScanPage()),
+                      );
+                    },
+                    child: IconButton(
+                      icon: SvgPicture.asset(
+                        'images/barcode_scanner.svg',
+                        colorFilter: ColorFilter.mode(
+                          Colors.white,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ScanPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 16.0),
+                  FloatingActionButton(
+                    child: Icon(Icons.history), // Use the history icon
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ViewCSVPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 16.0),
+          ],
+        ),
+      ),
+    ]
+    ),
+    ),);
   }
 }
 
@@ -253,40 +260,40 @@ class _SearchResultState extends State<SearchResult> {
         "http://classify.oclc.org/classify2/Classify?isbn=$_isbn&summary=true";
     http.Response response0 = await http.get(Uri.parse(url0));
     //Check the response status code
-    if (response0.statusCode == 200) {
-      final transformer = Xml2Json();
-      transformer.parse(response0.body);
-      String json = transformer.toParkerWithAttrs();
-      print(json);
-
-      var title;
-      var authors;
-      var ddc;
-      if (json != "") {
-        if (jsonDecode(json)['classify']['response']['_code'] == '0' ||
-            jsonDecode(json)['classify']['response']['_code'] == '4') {
-          if (jsonDecode(json)['classify']['work'] != null) {
-            authors = jsonDecode(json)['classify']['work']['_author'];
-            title = jsonDecode(json)['classify']['work']['_title'];
-          } else {
-            authors =
-                jsonDecode(json)['classify']['works']['work'][0]['_author'];
-            title = jsonDecode(json)['classify']['works']['work'][0]['_title'];
-          }
-          if (jsonDecode(json)['classify']['recommendations'] != null)
-            ddc = jsonDecode(json)['classify']['recommendations']['ddc']
-                ['mostPopular']['_nsfa'];
-        }
-      }
-      setState(() {
-        if (title != null) _title = title;
-        if (authors != null) _authors = authors;
-        if (ddc != null) _ddc = ddc;
-      });
-      print('url0 queried');
-    } else {
-      print('url0 failed');
-    }
+    // if (response0.statusCode == 200) {
+    //   final transformer = Xml2Json();
+    //   transformer.parse(response0.body);
+    //   String json = transformer.toParkerWithAttrs();
+    //   print(json);
+    //
+    //   var title;
+    //   var authors;
+    //   var ddc;
+    //   if (json != "") {
+    //     if (jsonDecode(json)['classify']['response']['_code'] == '0' ||
+    //         jsonDecode(json)['classify']['response']['_code'] == '4') {
+    //       if (jsonDecode(json)['classify']['work'] != null) {
+    //         authors = jsonDecode(json)['classify']['work']['_author'];
+    //         title = jsonDecode(json)['classify']['work']['_title'];
+    //       } else {
+    //         authors =
+    //             jsonDecode(json)['classify']['works']['work'][0]['_author'];
+    //         title = jsonDecode(json)['classify']['works']['work'][0]['_title'];
+    //       }
+    //       if (jsonDecode(json)['classify']['recommendations'] != null)
+    //         ddc = jsonDecode(json)['classify']['recommendations']['ddc']
+    //             ['mostPopular']['_nsfa'];
+    //     }
+    //   }
+    //   setState(() {
+    //     if (title != null) _title = title;
+    //     if (authors != null) _authors = authors;
+    //     if (ddc != null) _ddc = ddc;
+    //   });
+    //   print('url0 queried');
+    // } else {
+    //   print('url0 failed');
+    // }
 
     // Make an HTTP GET request to the Openlibrary
     String url1 = "https://openlibrary.org/isbn/$_isbn.json";
@@ -415,7 +422,49 @@ class _SearchResultState extends State<SearchResult> {
     }
 
     if (_coverlink == "")
-      _coverlink = "https://pictures.abebooks.com/isbn/$_isbn\.jpg";}
+      _coverlink = "https://pictures.abebooks.com/isbn/$_isbn\.jpg";
+
+    writeToCsv(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
+  }
+
+  void writeToCsv(String isbn, String title, String authors, String publisher,
+      String publicationYear, String ddc) async {
+    List<List<dynamic>> rows = [
+      [isbn, title, authors, publisher, publicationYear, ddc],
+    ];
+
+    String csvString = const ListToCsvConverter().convert(rows);
+
+    // Get the application documents directory
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/output.csv';
+
+    // Check if the file exists
+    bool fileExists = await File(filePath).exists();
+
+    // Check if the current ISBN is a duplicate
+    if (fileExists) {
+      List<String> lines = await File(filePath).readAsLines();
+      for (String line in lines) {
+        List<String> fields = line.split(',');
+        if (fields.isNotEmpty && fields[0] == isbn) {
+          print('Duplicate ISBN. Not writing to CSV.');
+          return;
+        }
+      }
+    } else {
+      // Write the header if the file is empty
+      csvString = 'ISBN,Title,Authors,Publisher,Publication Year,DDC\n' + csvString;
+    }
+
+    // Append a new line after each record
+    csvString += '\n';
+
+    // Write the CSV string to the file
+    File file = File(filePath);
+    await file.writeAsString(csvString, mode: FileMode.append);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -784,6 +833,52 @@ class _SearchResultState extends State<SearchResult> {
           Navigator.popUntil(context, ModalRoute.withName('/'));
         },
         child: Icon(Icons.arrow_back),
+      ),
+    );
+  }
+}
+
+class ViewCSVPage extends StatelessWidget {
+  Future<String> readCSVFile() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/output.csv';
+      final file = File(filePath);
+      final csvData = await file.readAsString();
+      final lines = csvData.split('\n');
+      return lines.join('\n'); // Add additional line breaks between entries
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Lookup History'),
+      ),
+      body: FutureBuilder<String>(
+        future: readCSVFile(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasData) {
+            final csvData = snapshot.data!;
+            return SingleChildScrollView(
+              child: Text(csvData),
+            );
+          } else {
+            return Center(
+              child: Text(
+                'Failed to load the CSV file.',
+                style: TextStyle(fontSize: 16),
+              ),
+            );
+          }
+        },
       ),
     );
   }

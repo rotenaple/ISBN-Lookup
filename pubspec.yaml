@@ -37,6 +37,10 @@ dependencies:
   xml: ^6.2.2
   xml2json: ^5.3.6
   url_launcher: ^6.1.9
+  intl: ^0.18.0
+  csv: ^5.0.0
+  open_file: ^3.0.1
+  path_provider: ^2.0.5
 
 dev_dependencies:
   flutter_test:
