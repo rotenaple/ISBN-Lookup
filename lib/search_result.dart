@@ -41,9 +41,10 @@ class _SearchResultState extends State<SearchResult> {
 
   void search(String isbn) async {
     _isbn = isbn;
+    String isbn13 = "";
 
     if (_isbn.length == 10) {
-      String isbn13 = IsbnCheck().convertIsbn10ToIsbn13(_isbn);
+      isbn13 = IsbnCheck().convertIsbn10ToIsbn13(_isbn);
 
       //await classifyAPILookup(_isbn);
       await openLibraryLookup(_isbn);
@@ -72,7 +73,12 @@ class _SearchResultState extends State<SearchResult> {
       return;
     }
 
-    writeToCsv(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
+    if (isbn13 == ""){
+      writeToCsv(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
+    } else {
+      writeToCsv(isbn13, _title, _authors, _publisher, _publicationYear, _ddc);
+    }
+
     _isSearchCompleted = true;
     setState(() {});
   }
