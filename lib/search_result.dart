@@ -17,17 +17,17 @@ class SearchResult extends StatefulWidget {
   const SearchResult({super.key, required this.isbn});
 
   @override
-  _SearchResultState createState() => _SearchResultState();
+  SearchResultState createState() => SearchResultState();
 }
 
-class _SearchResultState extends State<SearchResult> {
+class SearchResultState extends State<SearchResult> {
   String _title = '';
   String _authors = '';
   String _isbn = '';
   String _publisher = '';
   String _publicationYear = '';
   String _description = '';
-  String _imageURL = '';
+  String _coverlink = '';
   String _ddc = '';
   String _bookNew = '', _bookUsed = '', _destination = '';
 
@@ -163,7 +163,7 @@ class _SearchResultState extends State<SearchResult> {
         if (publicationYear != null && _publicationYear == "") {
           _publicationYear = publicationYear;
         }
-        if (imgURL != null && _imageURL == "") _imageURL = imgURL;
+        if (imgURL != null && _coverlink == "") _coverlink = imgURL;
         if (ddc != null && _ddc == "") _ddc = ddc;
       });
 
@@ -257,8 +257,8 @@ class _SearchResultState extends State<SearchResult> {
         if (_bookNew == "") _bookNew = bookNew;
         if (_bookUsed == "") _bookUsed = bookUsed;
         if (_destination == "") _destination = destination;
-        if (_imageURL == "") {
-          _imageURL = "https://pictures.abebooks.com/isbn/$_isbn.jpg";
+        if (_coverlink == "") {
+          _coverlink = "https://pictures.abebooks.com/isbn/$_isbn.jpg";
         }
       });
 
@@ -272,46 +272,56 @@ class _SearchResultState extends State<SearchResult> {
     }
   }
 
-  void writeToCsv(String isbn, String title, String authors, String publisher,
-      String publicationYear, String ddc) async {
-    List<List<dynamic>> rows = [
-      [isbn, title, authors, publisher, publicationYear, ddc],
-    ];
-
-    String csvString = const ListToCsvConverter().convert(rows);
-
-    // Get the application documents directory
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/output.csv';
-
-    // Check if the file exists
-    bool fileExists = await File(filePath).exists();
-
-    // Check if the current ISBN is a duplicate
-    if (fileExists) {
-      List<String> lines = await File(filePath).readAsLines();
-      for (String line in lines) {
-        List<String> fields = line.split(',');
-        if (fields.isNotEmpty && fields[0] == isbn) {
-          if (kDebugMode) {
-            print('Duplicate ISBN. Not writing to CSV.');
-          }
-          return;
-        }
-      }
-    } else {
-      // Write the header if the file is empty
-      csvString = 'ISBN,Title,Authors,Publisher,Publication Year,DDC\n$csvString';
+  Future<List<List<dynamic>>> readCSVFile() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/output.csv';
+      final file = File(filePath);
+      final csvData = await file.readAsString();
+      final csvList = CsvToListConverter().convert(csvData);
+      return csvList;
+    } catch (e) {
+      return []; // Return an empty list if an error occurs
     }
-
-    // Append a new line after each record
-    csvString += '\n';
-
-    // Write the CSV string to the file
-    File file = File(filePath);
-    await file.writeAsString(csvString, mode: FileMode.append);
   }
 
+  Future<void> initCsv() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/output.csv';
+    final file = File(filePath);
+    final exists = await file.exists();
+    if (!exists) {
+      await file.create(); // Create a blank file without writing any content.
+    }
+  }
+
+  Future<void> writeToCsv(String isbn, String title, String authors, String publisher,
+      String publicationYear, String ddc) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/output.csv';
+    final file = File(filePath);
+    final exists = await file.exists();
+    if (!exists) {
+      await initCsv();
+    }
+
+    // Check if the current ISBN is a duplicate
+    final lines = await file.readAsLines();
+    for (String line in lines) {
+      final fields = line.split(',');
+      if (fields.isNotEmpty && fields[0] == isbn) {
+        if (kDebugMode) {
+          print('Duplicate ISBN. Not writing to CSV.');
+        }
+        return;
+      }
+    }
+
+    final row = [isbn, title, authors, publisher, publicationYear, ddc];
+    final csvString = const ListToCsvConverter().convert([row]);
+    final csvLine = '$csvString\n';
+    await file.writeAsString(csvLine, mode: FileMode.append);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -320,7 +330,7 @@ class _SearchResultState extends State<SearchResult> {
       body: SafeArea(
           child: Column(
             children: [
-              if (_imageURL.isNotEmpty)
+              if (_coverlink.isNotEmpty)
                 Expanded(
                   flex: 5,
                   child: Stack(
@@ -333,7 +343,7 @@ class _SearchResultState extends State<SearchResult> {
                             BlendMode.darken,
                           ),
                           child: Image.network(
-                            _imageURL,
+                            _coverlink,
                             height: MediaQuery.of(context).size.height,
                             width: MediaQuery.of(context).size.width,
                             fit: BoxFit.fitWidth,
@@ -344,7 +354,7 @@ class _SearchResultState extends State<SearchResult> {
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
                           child: Image.network(
-                            _imageURL,
+                            _coverlink,
                             height: MediaQuery.of(context).size.height,
                             width: MediaQuery.of(context).size.width,
                             fit: BoxFit.contain,

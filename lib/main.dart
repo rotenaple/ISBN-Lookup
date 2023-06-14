@@ -99,7 +99,7 @@ class Home extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ViewCSVPage(),
+                          builder: (context) => ViewCSVPage(),
                         ),
                       );
                     },
