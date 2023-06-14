@@ -7,7 +7,6 @@ import 'dart:ui';
 import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:xml2json/xml2json.dart';
 import 'format_date.dart';
 import 'isbn_check.dart';
 
@@ -45,19 +44,16 @@ class SearchResultState extends State<SearchResult> {
     if (_isbn.length == 10) {
       isbn13 = IsbnCheck().convertIsbn10ToIsbn13(_isbn);
 
-      //await classifyAPILookup(_isbn);
       await openLibraryLookup(_isbn);
       await googleBooksAPILookup(_isbn);
       await abeBooksAPILookup(_isbn);
 
-      //await classifyAPILookup(isbn13);
       await openLibraryLookup(isbn13);
       await googleBooksAPILookup(isbn13);
       await abeBooksAPILookup(isbn13);
 
     } else if (_isbn.length == 13) {
 
-      //await classifyAPILookup(_isbn);
       await openLibraryLookup(_isbn);
       await googleBooksAPILookup(_isbn);
       await abeBooksAPILookup(_isbn);
@@ -83,57 +79,6 @@ class SearchResultState extends State<SearchResult> {
     }
 
     setState(() {});
-  }
-
-  Future<void> classifyAPILookup(String isbn) async {
-    String url =
-        "http://classify.oclc.org/classify2/Classify?isbn=$isbn&summary=true";
-    http.Response response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final transformer = Xml2Json();
-      transformer.parse(response.body);
-      String json = transformer.toParkerWithAttrs();
-      if (kDebugMode) {
-        print(json);
-      }
-
-      var title;
-      var authors;
-      var ddc;
-
-      if (json != "") {
-        if (jsonDecode(json)['classify']['response']['_code'] == '0' ||
-            jsonDecode(json)['classify']['response']['_code'] == '4') {
-          if (jsonDecode(json)['classify']['work'] != null) {
-            authors = jsonDecode(json)['classify']['work']['_author'];
-            title = jsonDecode(json)['classify']['work']['_title'];
-          } else {
-            authors = jsonDecode(json)['classify']['works']['work'][0]['_author'];
-            title = jsonDecode(json)['classify']['works']['work'][0]['_title'];
-          }
-
-          if (jsonDecode(json)['classify']['recommendations'] != null) {
-            ddc = jsonDecode(json)['classify']['recommendations']['ddc']
-            ['mostPopular']['_nsfa'];
-          }
-        }
-      }
-
-      setState(() {
-        if (title != null) _title = title;
-        if (authors != null) _authors = authors;
-        if (ddc != null) _ddc = ddc;
-      });
-
-      if (kDebugMode) {
-        print('Classify API lookup successful');
-      }
-    } else {
-      if (kDebugMode) {
-        print('Classify API lookup failed');
-      }
-    }
   }
 
   Future<void> openLibraryLookup(String isbn) async {
