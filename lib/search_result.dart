@@ -27,7 +27,7 @@ class _SearchResultState extends State<SearchResult> {
   String _publisher = '';
   String _publicationYear = '';
   String _description = '';
-  String _coverlink = '';
+  String _imageURL = '';
   String _ddc = '';
   String _bookNew = '', _bookUsed = '', _destination = '';
 
@@ -37,7 +37,6 @@ class _SearchResultState extends State<SearchResult> {
     search(widget.isbn);
   }
 
-  bool _isSearchCompleted = false;
 
   void search(String isbn) async {
     _isbn = isbn;
@@ -79,7 +78,6 @@ class _SearchResultState extends State<SearchResult> {
       writeToCsv(isbn13, _title, _authors, _publisher, _publicationYear, _ddc);
     }
 
-    _isSearchCompleted = true;
     setState(() {});
   }
 
@@ -140,7 +138,7 @@ class _SearchResultState extends State<SearchResult> {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      var title, authors, publisher, publicationYear, coverlink, coverid, ddc;
+      var title, authors, publisher, publicationYear, imgURL, coverid, ddc;
 
       if (data['title'] != null) title = data['title'];
       if (data['authors'][0]['name'] != null) authors = data['authors'][0]['name'];
@@ -151,7 +149,7 @@ class _SearchResultState extends State<SearchResult> {
       }
       if (data['covers'] != null) coverid = data['covers'][0];
       if (coverid != null) {
-        coverlink = "https://covers.openlibrary.org/b/id/$coverid-L.jpg";
+        imgURL = "https://covers.openlibrary.org/b/id/$coverid-L.jpg";
       }
       if (data['dewey_decimal_class'] != null) {
         ddc = data['dewey_decimal_class'][0];
@@ -165,7 +163,7 @@ class _SearchResultState extends State<SearchResult> {
         if (publicationYear != null && _publicationYear == "") {
           _publicationYear = publicationYear;
         }
-        if (coverlink != null && _coverlink == "") _coverlink = coverlink;
+        if (imgURL != null && _imageURL == "") _imageURL = imgURL;
         if (ddc != null && _ddc == "") _ddc = ddc;
       });
 
@@ -256,11 +254,11 @@ class _SearchResultState extends State<SearchResult> {
       }
 
       setState(() {
-        if (bookNew != null && _bookNew == "") _bookNew = bookNew;
-        if (bookUsed != null && _bookUsed == "") _bookUsed = bookUsed;
-        if (destination != null && _destination == "") _destination = destination;
-        if (_coverlink == "") {
-          _coverlink = "https://pictures.abebooks.com/isbn/$_isbn.jpg";
+        if (_bookNew == "") _bookNew = bookNew;
+        if (_bookUsed == "") _bookUsed = bookUsed;
+        if (_destination == "") _destination = destination;
+        if (_imageURL == "") {
+          _imageURL = "https://pictures.abebooks.com/isbn/$_isbn.jpg";
         }
       });
 
@@ -314,14 +312,6 @@ class _SearchResultState extends State<SearchResult> {
     await file.writeAsString(csvString, mode: FileMode.append);
   }
 
-  @override
-  Future<void> _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +320,7 @@ class _SearchResultState extends State<SearchResult> {
       body: SafeArea(
           child: Column(
             children: [
-              if (_coverlink.isNotEmpty)
+              if (_imageURL.isNotEmpty)
                 Expanded(
                   flex: 5,
                   child: Stack(
@@ -343,7 +333,7 @@ class _SearchResultState extends State<SearchResult> {
                             BlendMode.darken,
                           ),
                           child: Image.network(
-                            _coverlink,
+                            _imageURL,
                             height: MediaQuery.of(context).size.height,
                             width: MediaQuery.of(context).size.width,
                             fit: BoxFit.fitWidth,
@@ -354,7 +344,7 @@ class _SearchResultState extends State<SearchResult> {
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
                           child: Image.network(
-                            _coverlink,
+                            _imageURL,
                             height: MediaQuery.of(context).size.height,
                             width: MediaQuery.of(context).size.width,
                             fit: BoxFit.contain,
