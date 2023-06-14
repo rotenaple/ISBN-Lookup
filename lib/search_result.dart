@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:xml2json/xml2json.dart';
-
+import 'format_date.dart';
 import 'isbn_check.dart';
 
 class SearchResult extends StatefulWidget {
@@ -71,6 +71,10 @@ class SearchResultState extends State<SearchResult> {
       );
       return;
     }
+
+
+    ExtractYear extractYear = ExtractYear();
+    _publicationYear = extractYear.extract(_publicationYear);
 
     if (isbn13 == ""){
       writeToCsv(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
