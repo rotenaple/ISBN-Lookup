@@ -9,6 +9,24 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'format_date.dart';
 import 'isbn_check.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:web_scraper/web_scraper.dart';
+
+String extractTextContent(dom.Element? element) {
+  if (element == null) {
+    return '';
+  }
+
+  final buffer = StringBuffer();
+  for (var node in element.nodes) {
+    if (node is dom.Text) {
+      buffer.write(node.text);
+    } else if (node is dom.Element) {
+      buffer.write(extractTextContent(node));
+    }
+  }
+  return buffer.toString();
+}
 
 class SearchResult extends StatefulWidget {
   final String isbn;
@@ -36,7 +54,6 @@ class SearchResultState extends State<SearchResult> {
     search(widget.isbn);
   }
 
-
   void search(String isbn) async {
     _isbn = isbn;
     String isbn13 = "";
@@ -48,12 +65,14 @@ class SearchResultState extends State<SearchResult> {
       await googleBooksAPILookup(_isbn);
       await abeBooksAPILookup(_isbn);
 
+      //await oclcClassifyLookup(isbn13);
       await openLibraryLookup(isbn13);
       await googleBooksAPILookup(isbn13);
       await abeBooksAPILookup(isbn13);
 
     } else if (_isbn.length == 13) {
 
+      //await oclcClassifyLookup(_isbn);
       await openLibraryLookup(_isbn);
       await googleBooksAPILookup(_isbn);
       await abeBooksAPILookup(_isbn);
@@ -80,6 +99,60 @@ class SearchResultState extends State<SearchResult> {
 
     setState(() {});
   }
+
+  String extractTextContent(dom.Element? element) {
+    if (element == null) {
+      return '';
+    }
+
+    final buffer = StringBuffer();
+    for (var node in element.nodes) {
+      if (node is dom.Text) {
+        buffer.write(node.text);
+      } else if (node is dom.Element) {
+        buffer.write(extractTextContent(node));
+      }
+    }
+    return buffer.toString();
+  }
+
+
+
+
+  Future<void> oclcClassifyLookup(String isbn) async {
+    final webScraper = WebScraper('http://classify.oclc.org');
+
+    if (await webScraper.loadWebPage(
+        '/classify2/ClassifyDemo?search-standnum-txt=$isbn')) {
+      final element = webScraper.getElement(
+        '#results-table > tbody > tr:nth-child(1) > td.ta > span.title > a',
+        ['href'],
+      );
+
+      if (element.isNotEmpty) {
+        final url = element.first['attributes']['href'];
+        print('Element Text: $url');
+
+        if (await webScraper.loadWebPage(url)) {
+          final standard = webScraper.getElement(
+            '#classSummaryData > thead:nth-child(1) > tr:nth-child(1) > th:nth-child(1)',
+            ['title'],
+          );
+          print("std " + standard.toString());
+        }
+          final stdNum = webScraper.getElement(
+            '#classSummaryData > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)',
+            [],
+          );
+
+          print("stdNum " + stdNum.toString());
+        }
+      }
+    }
+
+
+
+
 
   Future<void> openLibraryLookup(String isbn) async {
     String url = "https://openlibrary.org/isbn/$isbn.json";
@@ -265,12 +338,21 @@ class SearchResultState extends State<SearchResult> {
         return;
       }
     }
+    var replaceTo = '';
 
-    final row = [isbn, title, authors, publisher, publicationYear, ddc];
+    final row = [
+      isbn.replaceAll(',', replaceTo),
+      title.replaceAll(',', replaceTo),
+      authors.replaceAll(',', replaceTo),
+      publisher.replaceAll(',', replaceTo),
+      publicationYear.replaceAll(',', replaceTo),
+      ddc.replaceAll(',', replaceTo)
+    ];
     final csvString = const ListToCsvConverter().convert([row]);
     final csvLine = '$csvString\n';
     await file.writeAsString(csvLine, mode: FileMode.append);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -607,11 +689,12 @@ class SearchResultState extends State<SearchResult> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisSize: MainAxisSize.max,
+
                                   children: [
                                     Expanded(
                                       flex: 1,
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                                        padding: const EdgeInsets.fromLTRB(10,20,10,0),
                                         child: FilledButton(
                                           onPressed: () {
                                             launch('https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews');
@@ -643,12 +726,14 @@ class SearchResultState extends State<SearchResult> {
                 )
             ],
           )),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate back to the main page
-          Navigator.popUntil(context, ModalRoute.withName('/'));
-        },
-        child: const Icon(Icons.arrow_back),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 20, 20),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.popUntil(context, ModalRoute.withName('/'));
+          },
+          child: const Icon(Icons.arrow_back),
+        ),
       ),
     );
   }
