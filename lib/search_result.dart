@@ -616,7 +616,7 @@ class SearchResultState extends State<SearchResult> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 0),
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
                             child: Text(
                               "Prices from Abebooks, Shipping to $_destination",
                               textAlign: TextAlign.start,
@@ -694,7 +694,7 @@ class SearchResultState extends State<SearchResult> {
                                     Expanded(
                                       flex: 1,
                                       child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(10,20,10,0),
+                                        padding: const EdgeInsets.fromLTRB(10,5,10,0),
                                         child: FilledButton(
                                           onPressed: () {
                                             launch('https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews');

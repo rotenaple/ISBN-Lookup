@@ -65,69 +65,70 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-            child: Container(
-              color: Colors.blue, // Set the background color to blue
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-              child: const Text(
-                'Lookup History',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+              child: Container(
+                color: Colors.blue, // Set the background color to blue
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                child: const Text(
+                  'Lookup History',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: FutureBuilder<List<String>>(
-              future: readCSVFile(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (snapshot.hasData) {
-                  final csvData = snapshot.data!;
-
-                  if (csvData.isEmpty || csvData.every((line) => line.trim().isEmpty)) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'No records yet',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(height: 16),
-                          FilledButton(
-                            onPressed: () {
-                              Navigator.pop(context); // Return to the previous page
-                            },
-                            child: const Text('Go Back'),
-                          ),
-                        ],
-                      ),
+            Expanded(
+              child: FutureBuilder<List<String>>(
+                future: readCSVFile(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
                     );
-                  }
+                  } else if (snapshot.hasData) {
+                    final csvData = snapshot.data!;
 
-                  return ListView.builder(
-                    itemCount: csvData.length - 1,
-                    itemBuilder: (context, index) {
-                      final row = csvData[index].split(',');
-                      final isbn = row[0];
-                      final title = row[1];
-                      final author = row[2];
-                      final publisher = row[3];
-                      final pubYear = row[4];
-                      final dewey = row[5];
+                    if (csvData.isEmpty || csvData.every((line) => line.trim().isEmpty)) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'No records yet',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 16),
+                            FilledButton(
+                              onPressed: () {
+                                Navigator.pop(context); // Return to the previous page
+                              },
+                              child: const Text('Go Back'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
 
-                      return Padding(
-                          padding: const EdgeInsets.fromLTRB(0,0,0,10),
+                    return ListView.builder(
+                      itemCount: csvData.length - 1,
+                      itemBuilder: (context, index) {
+                        final row = csvData[index].split(',');
+                        final isbn = row[0];
+                        final title = row[1];
+                        final author = row[2];
+                        final publisher = row[3];
+                        final pubYear = row[4];
+                        final dewey = row[5];
+
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
                           child: Card(
                             child: ListTile(
                               title: Text(title),
@@ -176,34 +177,34 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                               ),
                             ),
                           ),
-
-                      );
-                    },
-                  );
-                } else {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Failed to load the CSV file.',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context); // Return to the previous page
-                          },
-                          child: const Text('Go Back'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              },
+                        );
+                      },
+                    );
+                  } else {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Failed to load the CSV file.',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context); // Return to the previous page
+                            },
+                            child: const Text('Go Back'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: Align(
         alignment: Alignment.bottomRight,
