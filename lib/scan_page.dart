@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:isbn_book_search_test_flutter/utils.dart';
+import 'package:isbn_book_search_test_flutter/isbn_check.dart';
 import 'search_result.dart';
+
 
 class ScanPage extends StatefulWidget {
   const ScanPage({Key? key}) : super(key: key);
@@ -59,9 +59,10 @@ class _ScanPageState extends State<ScanPage> {
                             final List<Barcode> barcodes = capture.barcodes;
                             for (final barcode in barcodes) {
                               final String? isbn = barcode.rawValue;
+                              IsbnCheck isbnCheck = IsbnCheck();
                               if (isbn != null &&
                                   (isbn.length == 10 || isbn.length == 13) &&
-                                  IsbnUtils.isValidIsbn(isbn)) {
+                                  isbnCheck.isValidIsbnFormat(isbn)) {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -116,7 +117,7 @@ class _ScanPageState extends State<ScanPage> {
       floatingActionButton: Align(
         alignment: Alignment.bottomRight,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 20, 20),
+          padding: const EdgeInsets.fromLTRB(0, 0, 5, 5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end, // Align the column to the bottom
             children: [

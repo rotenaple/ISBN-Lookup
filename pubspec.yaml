@@ -48,7 +48,6 @@ dependencies:
   html: ^0.15.0
   web_scraper: ^0.1.4
 
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

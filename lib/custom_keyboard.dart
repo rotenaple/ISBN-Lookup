@@ -59,15 +59,21 @@ class CustomKeyboard extends StatelessWidget {
 
   Widget buildBackspaceButton() {
     return Expanded(
-      child: TextButton(
-        child: const Icon(
-          Icons.backspace,
-          size: 24.0,
-        ),
-        onPressed: () {
-          onKeyPressed('backspace');
+      child: GestureDetector(
+        onLongPress: () {
+          onKeyPressed('clear'); // Use 'clear' as the key identifier for the long-press on backspace
           _vibrateOnKeyPress();
         },
+        child: TextButton(
+          child: const Icon(
+            Icons.backspace,
+            size: 24.0,
+          ),
+          onPressed: () {
+            onKeyPressed('backspace');
+            _vibrateOnKeyPress();
+          },
+        ),
       ),
     );
   }
@@ -125,20 +131,26 @@ class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
       builder: (BuildContext context) {
         return Theme(
           data: ThemeData(
-            canvasColor: Colors.transparent, // Set the background color to transparent
+            canvasColor: Colors
+                .transparent, // Set the background color to transparent
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0),
-            child: IntrinsicHeight(
-              child: Container(
-                color: Colors.white,
+          child: Container(
+            color: Colors.white,
+            // Set the background color of the container to match the keyboard color
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              child: IntrinsicHeight(
                 child: CustomKeyboard(
                   onKeyPressed: (key) {
                     setState(() {
                       if (key == 'backspace') {
                         if (widget.controller.text.isNotEmpty) {
-                          widget.controller.text = widget.controller.text.substring(0, widget.controller.text.length - 1);
+                          widget.controller.text =
+                              widget.controller.text.substring(
+                                  0, widget.controller.text.length - 1);
                         }
+                      } else if (key == 'clear') {
+                        widget.controller.clear(); // Clear all text
                       } else {
                         widget.controller.text += key;
                       }
@@ -152,5 +164,4 @@ class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
       },
     );
   }
-
 }

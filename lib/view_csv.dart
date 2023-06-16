@@ -72,14 +72,14 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
               child: Container(
-                color: Colors.blue, // Set the background color to blue
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                color: Colors.transparent, // Set the background color to blue
+                padding: const EdgeInsets.fromLTRB(20,10,20,0),
                 child: const Text(
                   'Lookup History',
                   style: TextStyle(
                     fontSize: 24,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
               ),
@@ -212,7 +212,7 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
       floatingActionButton: Align(
         alignment: Alignment.bottomRight,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 20, 20),
+          padding: const EdgeInsets.fromLTRB(0, 0, 5, 5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end, // Align the column to the bottom
             children: [

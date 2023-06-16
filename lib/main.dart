@@ -75,7 +75,7 @@ class Home extends StatelessWidget {
       floatingActionButton: Align(
         alignment: Alignment.bottomRight,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 20, 20),
+          padding: const EdgeInsets.fromLTRB(0, 0, 5, 5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
