@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:isbn_book_search_test_flutter/theme.dart';
 
 class CustomKeyboard extends StatelessWidget {
   final Function(String) onKeyPressed;
@@ -43,10 +44,13 @@ class CustomKeyboard extends StatelessWidget {
   Widget buildDigitButton(String digit) {
     return Expanded(
       child: TextButton(
-        child: Text(
-          digit,
-          style: const TextStyle(fontSize: 24.0),
-        ),
+          child: Text(
+            digit,
+            style: const TextStyle(
+              fontSize: 24.0,
+              color: AppTheme.primColor, // Set the desired text color
+            ),
+          ),
         onPressed: () {
           if (_isValidInput(digit)) {
             onKeyPressed(digit);
@@ -68,6 +72,7 @@ class CustomKeyboard extends StatelessWidget {
           child: const Icon(
             Icons.backspace,
             size: 24.0,
+            color: AppTheme.primColor,
           ),
           onPressed: () {
             onKeyPressed('backspace');
@@ -141,6 +146,7 @@ class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
               padding: const EdgeInsets.symmetric(vertical: 20.0),
               child: IntrinsicHeight(
                 child: CustomKeyboard(
+
                   onKeyPressed: (key) {
                     setState(() {
                       if (key == 'backspace') {

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:isbn_book_search_test_flutter/theme.dart';
 import 'package:isbn_book_search_test_flutter/view_csv.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:isbn_book_search_test_flutter/isbn_check.dart';
@@ -10,13 +11,13 @@ class ScanPage extends StatefulWidget {
   const ScanPage({Key? key}) : super(key: key);
 
   @override
-  _ScanPageState createState() => _ScanPageState();
+  ScanPageState createState() => ScanPageState();
 }
 
-class _ScanPageState extends State<ScanPage> {
+class ScanPageState extends State<ScanPage> {
   String? lastScan;
   String? thisScan;
-  bool isScanning = false; // Flag to track scanning status
+  static bool isScanning = false; // Flag to track scanning status
 
   MobileScannerController controller = MobileScannerController(
     facing: CameraFacing.back,
@@ -124,6 +125,7 @@ class _ScanPageState extends State<ScanPage> {
               children: [
                 FloatingActionButton(
                   onPressed: () {},
+                  backgroundColor: AppTheme.primColor,
                   child: IconButton(
                     icon: const Icon(Icons.keyboard),
                     onPressed: () {
@@ -133,7 +135,6 @@ class _ScanPageState extends State<ScanPage> {
                 ),
                 const SizedBox(height: 16.0),
                 FloatingActionButton(
-                  child: const Icon(Icons.history),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -142,6 +143,8 @@ class _ScanPageState extends State<ScanPage> {
                       ),
                     );
                   },
+                  backgroundColor: AppTheme.primColor,
+                  child: const Icon(Icons.history),
                 ),
               ],
             ),

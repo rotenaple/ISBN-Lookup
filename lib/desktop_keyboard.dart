@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:isbn_book_search_test_flutter/theme.dart';
 
 
 class DesktopKeyboardTextField extends StatelessWidget {
@@ -13,8 +14,11 @@ class DesktopKeyboardTextField extends StatelessWidget {
       controller: controller,
       decoration: const InputDecoration(
         border: OutlineInputBorder(),
-        labelText: 'Input ISBN Here',
         floatingLabelAlignment: FloatingLabelAlignment.center,
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey), // Set the desired color for the focused border
+        ),
+
       ),
       textAlign: TextAlign.center,
       maxLength: 13,

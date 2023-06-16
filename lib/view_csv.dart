@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:isbn_book_search_test_flutter/theme.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 var printed = false;
@@ -267,6 +268,7 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
+                backgroundColor: AppTheme.primColor,
                 child: const Icon(Icons.arrow_back),
               ),
             ],

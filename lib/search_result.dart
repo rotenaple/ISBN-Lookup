@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:isbn_book_search_test_flutter/scan_page.dart';
+import 'package:isbn_book_search_test_flutter/theme.dart';
 import 'dart:ui';
 import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
@@ -651,13 +653,14 @@ class SearchResultState extends State<SearchResult> {
                                     Expanded(
                                       flex: 1,
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
                                         child: FilledButton(
                                           onPressed: () {
                                             launch('https://www.bookfinder.com/isbn/$_isbn/');
                                           },
                                           style: ButtonStyle(
                                             padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                            backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primColor),
                                           ),
                                           child: const Text(
                                             "Search Bookfinder",
@@ -667,6 +670,7 @@ class SearchResultState extends State<SearchResult> {
                                             ),
                                             maxLines: 2,
                                             textAlign: TextAlign.center,
+
                                           ),
                                         ),
                                       ),
@@ -674,13 +678,14 @@ class SearchResultState extends State<SearchResult> {
                                     Expanded(
                                       flex: 1,
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
                                         child: FilledButton(
                                           onPressed: () {
                                             launch('https://www.abebooks.com/servlet/SearchResults?kn=$_isbn');
                                           },
                                           style: ButtonStyle(
                                             padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                            backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primColor),
                                           ),
                                           child: const Text(
                                             "Search Abebooks",
@@ -704,13 +709,14 @@ class SearchResultState extends State<SearchResult> {
                                     Expanded(
                                       flex: 1,
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
                                         child: FilledButton(
                                           onPressed: () {
                                             launch('https://openlibrary.org/isbn/$_isbn');
                                           },
                                           style: ButtonStyle(
                                             padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                            backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primColor),
                                           ),
                                           child: const Text(
                                             "Search Open Library",
@@ -727,13 +733,14 @@ class SearchResultState extends State<SearchResult> {
                                     Expanded(
                                       flex: 1,
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
                                         child: FilledButton(
                                           onPressed: () {
                                             launch('https://www.goodreads.com/search?q=$_isbn');
                                           },
                                           style: ButtonStyle(
                                             padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                            backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primColor),
                                           ),
                                           child: const Text(
                                             "Search Goodreads",
@@ -758,13 +765,14 @@ class SearchResultState extends State<SearchResult> {
                                     Expanded(
                                       flex: 1,
                                       child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(10,0,10,0),
+                                        padding: const EdgeInsets.fromLTRB(10,5,10,0),
                                         child: FilledButton(
                                           onPressed: () {
                                             launch('https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews');
                                           },
                                           style: ButtonStyle(
                                             padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                            backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primColor),
                                           ),
                                           child: const Text(
                                             "Search Findit\u200b@Flinders",
@@ -785,7 +793,7 @@ class SearchResultState extends State<SearchResult> {
                           ),
 
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(100, 10, 100, 5),
+                            padding: const EdgeInsets.fromLTRB(100, 15, 100, 5),
                             child: _svgBarcode.isNotEmpty ? SvgPicture.string(_svgBarcode) : const SizedBox(height: 80,),
                           ),
                         ],
@@ -799,7 +807,9 @@ class SearchResultState extends State<SearchResult> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.fromLTRB(0, 0, 5, 5),
         child: FloatingActionButton(
+          backgroundColor: AppTheme.primColor,
           onPressed: () {
+            ScanPageState.isScanning = false;
             Navigator.pop(context);
           },
           child: const Icon(Icons.arrow_back),

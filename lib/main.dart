@@ -7,6 +7,8 @@ import 'search_result.dart';
 import 'view_csv.dart';
 import 'custom_keyboard.dart';
 import 'desktop_keyboard.dart';
+import 'theme.dart';
+import 'package:flutter/material.dart';
 
 void main() => runApp(MaterialApp(home: Home()));
 
@@ -16,25 +18,25 @@ class Home extends StatelessWidget {
   Home({super.key});
 
   void search(BuildContext context, String isbn) {
-      IsbnCheck checker = IsbnCheck();
-      bool check = checker.isValidIsbnFormat(isbn);
-      if (check) {
-        // Use the isValidIsbn method from IsbnUtils class
-        // Navigate to the result page
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SearchResult(isbn: isbn)),
-        );
-      } else {
-        // Show an error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            duration: Duration(milliseconds: 500),
-            content: Text('Invalid ISBN'),
-          ),
-        );
-      }
+    IsbnCheck checker = IsbnCheck();
+    bool check = checker.isValidIsbnFormat(isbn);
+    if (check) {
+      // Use the isValidIsbn method from IsbnUtils class
+      // Navigate to the result page
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SearchResult(isbn: isbn)),
+      );
+    } else {
+      // Show an error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(milliseconds: 500),
+          content: Text('Invalid ISBN'),
+        ),
+      );
     }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,15 +54,32 @@ class Home extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
+
+                    child: Text(
+                      "Input an ISBN-10 or ISBN-13 number:",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontStyle: FontStyle.normal,
+                        //fontSize: 16,
+                        color: Color(0xff000000),
+                      ),
+                    ),),
                   Platform.isIOS || Platform.isAndroid
                       ? CustomKeyboardTextField(controller: isbnController)
                       : DesktopKeyboardTextField(controller: isbnController), // Use normal TextField on other platforms
                   FilledButton(
                     onPressed: () {
+
                       String isbn = isbnController.text;
                       search(context, isbn);
                     },
                     child: const Text('Search'),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primColor), // Set the background color of the button to blue
+                    ),
                   ),
                 ],
               ),
@@ -87,6 +106,7 @@ class Home extends StatelessWidget {
                       MaterialPageRoute(builder: (context) => ScanPage()),
                     );
                   },
+                  backgroundColor: AppTheme.primColor,
                   child: SvgPicture.asset(
                     'images/barcode_scanner.svg',
                     colorFilter: const ColorFilter.mode(
@@ -99,7 +119,7 @@ class Home extends StatelessWidget {
                 ),
               const SizedBox(height: 16.0),
               FloatingActionButton(
-                child: const Icon(Icons.history),
+                backgroundColor: AppTheme.primColor,
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -108,6 +128,7 @@ class Home extends StatelessWidget {
                     ),
                   );
                 },
+                child: const Icon(Icons.history),
               ),
             ],
           ),
