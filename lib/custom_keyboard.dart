@@ -111,7 +111,6 @@ class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
       controller: widget.controller,
       decoration: const InputDecoration(
         border: OutlineInputBorder(),
-        labelText: 'Input ISBN Here',
         floatingLabelAlignment: FloatingLabelAlignment.center,
       ),
       textAlign: TextAlign.center,
