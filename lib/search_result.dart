@@ -140,21 +140,27 @@ class SearchResultState extends State<SearchResult> {
 
       if (element.isNotEmpty) {
         final url = element.first['attributes']['href'];
-        print('Element Text: $url');
+        if (kDebugMode) {
+          print('Element Text: $url');
+        }
 
         if (await webScraper.loadWebPage(url)) {
           final standard = webScraper.getElement(
             '#classSummaryData > thead:nth-child(1) > tr:nth-child(1) > th:nth-child(1)',
             ['title'],
           );
-          print("std " + standard.toString());
+          if (kDebugMode) {
+            print("std $standard");
+          }
         }
           final stdNum = webScraper.getElement(
             '#classSummaryData > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)',
             [],
           );
 
-          print("stdNum " + stdNum.toString());
+          if (kDebugMode) {
+            print("stdNum $stdNum");
+          }
         }
       }
     }
@@ -305,7 +311,7 @@ class SearchResultState extends State<SearchResult> {
       final filePath = '${directory.path}/output.csv';
       final file = File(filePath);
       final csvData = await file.readAsString();
-      final csvList = CsvToListConverter().convert(csvData);
+      final csvList = const CsvToListConverter().convert(csvData);
       return csvList;
     } catch (e) {
       return []; // Return an empty list if an error occurs
@@ -701,13 +707,13 @@ class SearchResultState extends State<SearchResult> {
                                         padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
                                         child: FilledButton(
                                           onPressed: () {
-                                            launch('https://www.worldcat.org/search?q=$_isbn');
+                                            launch('https://openlibrary.org/isbn/$_isbn');
                                           },
                                           style: ButtonStyle(
                                             padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
                                           ),
                                           child: const Text(
-                                            "Search WorldCat",
+                                            "Search Open Library",
                                             style: TextStyle(
                                               fontWeight: FontWeight.w400,
                                               fontStyle: FontStyle.normal,
@@ -779,8 +785,8 @@ class SearchResultState extends State<SearchResult> {
                           ),
 
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(100, 10, 100, 25),
-                            child: _svgBarcode.isNotEmpty ? SvgPicture.string(_svgBarcode) : SizedBox(),
+                            padding: const EdgeInsets.fromLTRB(100, 10, 100, 5),
+                            child: _svgBarcode.isNotEmpty ? SvgPicture.string(_svgBarcode) : const SizedBox(height: 80,),
                           ),
                         ],
                       ),
@@ -791,10 +797,10 @@ class SearchResultState extends State<SearchResult> {
           )
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 20, 20),
+        padding: const EdgeInsets.fromLTRB(0, 0, 5, 5),
         child: FloatingActionButton(
           onPressed: () {
-            Navigator.popUntil(context, ModalRoute.withName('/'));
+            Navigator.pop(context);
           },
           child: const Icon(Icons.arrow_back),
         ),

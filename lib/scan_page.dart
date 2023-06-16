@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:isbn_book_search_test_flutter/view_csv.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:isbn_book_search_test_flutter/isbn_check.dart';
 import 'search_result.dart';
@@ -114,26 +115,38 @@ class _ScanPageState extends State<ScanPage> {
 
           ),
         ),
-      floatingActionButton: Align(
-        alignment: Alignment.bottomRight,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 5, 5),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end, // Align the column to the bottom
-            children: [
-              FloatingActionButton(
-                onPressed: () {},
-                child: IconButton(
-                  icon: const Icon(Icons.keyboard),
+        floatingActionButton: Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 5, 5),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {},
+                  child: IconButton(
+                    icon: const Icon(Icons.keyboard),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                FloatingActionButton(
+                  child: const Icon(Icons.history),
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ViewCSVPage(),
+                      ),
+                    );
                   },
                 ),
-              )
-            ],
+              ],
+            ),
           ),
         ),
-      ),
     );
   }
 }

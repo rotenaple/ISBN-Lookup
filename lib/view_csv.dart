@@ -265,7 +265,7 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
               const SizedBox(height: 16.0), // Add spacing between the two FloatingActionButton
               FloatingActionButton(
                 onPressed: () {
-                  Navigator.popUntil(context, ModalRoute.withName('/'));
+                  Navigator.pop(context);
                 },
                 child: const Icon(Icons.arrow_back),
               ),

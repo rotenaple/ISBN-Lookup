@@ -2,7 +2,7 @@ class TitleCaseConverter {
   static String convertToTitleCase(String input) {
     final List<String> functionWords = [
       'a', 'an', 'the', 'of', 'in', 'on', 'with', 'by', 'for',
-      'to', 'and', 'but', 'or', 'nor', 'so', 'yet'
+      'to', 'and', 'but', 'or', 'nor', 'so', 'yet', 'as'
     ];
     final List<String> words = input.split(' ');
     for (int i = 0; i < words.length; i++) {
