@@ -694,12 +694,65 @@ class SearchResultState extends State<SearchResult> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Expanded(
+                                      flex: 1,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                                        child: FilledButton(
+                                          onPressed: () {
+                                            launch('https://www.worldcat.org/search?q=$_isbn');
+                                          },
+                                          style: ButtonStyle(
+                                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                          ),
+                                          child: const Text(
+                                            "Search WorldCat",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontStyle: FontStyle.normal,
+                                            ),
+                                            maxLines: 2,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 1,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                                        child: FilledButton(
+                                          onPressed: () {
+                                            launch('https://www.goodreads.com/search?q=$_isbn');
+                                          },
+                                          style: ButtonStyle(
+                                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                          ),
+                                          child: const Text(
+                                            "Search Goodreads",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontStyle: FontStyle.normal,
+                                            ),
+                                            maxLines: 2,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.max,
 
                                   children: [
                                     Expanded(
                                       flex: 1,
                                       child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(10,5,10,0),
+                                        padding: const EdgeInsets.fromLTRB(10,0,10,0),
                                         child: FilledButton(
                                           onPressed: () {
                                             launch('https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews');
@@ -724,11 +777,10 @@ class SearchResultState extends State<SearchResult> {
                               ],
                             ),
                           ),
+
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(100,10,100,30),
-                            child: SvgPicture.string(
-                              _svgBarcode ?? '',
-                            ),
+                            padding: const EdgeInsets.fromLTRB(100, 10, 100, 25),
+                            child: _svgBarcode.isNotEmpty ? SvgPicture.string(_svgBarcode) : SizedBox(),
                           ),
                         ],
                       ),
