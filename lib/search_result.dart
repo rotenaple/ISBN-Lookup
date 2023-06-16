@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'format_date.dart';
 import 'isbn_check.dart';
+import 'title_case_converter.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:web_scraper/web_scraper.dart';
 
@@ -87,6 +88,9 @@ class SearchResultState extends State<SearchResult> {
       return;
     }
 
+    _title = TitleCaseConverter.convertToTitleCase(_title);
+    _authors = TitleCaseConverter.convertToTitleCase(_authors);
+    _publisher = TitleCaseConverter.convertToTitleCase(_publisher);
 
     ExtractYear extractYear = ExtractYear();
     _publicationYear = extractYear.extract(_publicationYear);

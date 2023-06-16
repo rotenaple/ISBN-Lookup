@@ -128,52 +128,55 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                         final dewey = row[5];
 
                         return Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                           child: Card(
-                            child: ListTile(
-                              title: Text(title),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (author.trim().isNotEmpty) Text('by $author') else const Text(""),
-                                  Text(publisher.isNotEmpty && pubYear.isNotEmpty ? '$publisher $pubYear' : '$publisher$pubYear'),
-                                  Text('$isbn $dewey'),
-                                ],
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.copy),
-                                    onPressed: () {
-                                      copyBookInformationToClipboard(context, title, author, publisher, isbn);
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete),
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          content: Text('Are you sure you want to delete this record?'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(context), // Cancel the deletion
-                                              child: Text('Cancel'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context); // Close the dialog
-                                                deleteRowFromCSV(isbn);
-                                              },
-                                              child: Text('Delete'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
+                              child: ListTile(
+                                title: Text(title),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (author.trim().isNotEmpty) Text('by $author') else const Text(""),
+                                    Text(publisher.isNotEmpty && pubYear.isNotEmpty ? '$publisher $pubYear' : '$publisher$pubYear'),
+                                    Text('$isbn $dewey'),
+                                  ],
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.copy),
+                                      onPressed: () {
+                                        copyBookInformationToClipboard(context, title, author, publisher, isbn);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.delete),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            content: Text('Are you sure you want to delete this record?'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(context), // Cancel the deletion
+                                                child: Text('Cancel'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context); // Close the dialog
+                                                  deleteRowFromCSV(isbn);
+                                                },
+                                                child: Text('Delete'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -216,14 +219,44 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
               if (kDebugMode) // Conditionally show the button in debug mode
                 FloatingActionButton(
                   onPressed: () async {
-                    final directory = await getApplicationDocumentsDirectory();
-                    final filePath = '${directory.path}/output.csv';
-                    final file = File(filePath);
-                    final exists = await file.exists();
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          content: Text('Are you sure you want to delete all records?'),
+                          actions: [
+                            TextButton(
+                              child: Text('Cancel'),
+                              onPressed: () {
+                                Navigator.of(context).pop(false); // Return false to indicate cancellation
+                              },
+                            ),
+                            TextButton(
+                              child: const Text(
+                                'Delete',
+                                style: TextStyle(
+                                  color: Colors.red, // Set the text color to red
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop(true); // Return true to indicate confirmation
+                              },
+                            )
+                          ],
+                        );
+                      },
+                    );
 
-                    if (exists) {
-                      await file.delete();
-                      refreshPage(); // Refresh the page after deleting the file
+                    if (confirmed == true) {
+                      final directory = await getApplicationDocumentsDirectory();
+                      final filePath = '${directory.path}/output.csv';
+                      final file = File(filePath);
+                      final exists = await file.exists();
+
+                      if (exists) {
+                        await file.delete();
+                        refreshPage(); // Refresh the page after deleting the file
+                      }
                     }
                   },
                   backgroundColor: Colors.red, // Set the button color to red
