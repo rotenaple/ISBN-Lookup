@@ -1,6 +1,8 @@
+import 'package:barcode/barcode.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:ui';
@@ -48,6 +50,7 @@ class SearchResultState extends State<SearchResult> {
   String _coverlink = '';
   String _ddc = '';
   String _bookNew = '', _bookUsed = '', _destination = '';
+  String _svgBarcode = '';
 
   @override
   void initState() {
@@ -92,6 +95,9 @@ class SearchResultState extends State<SearchResult> {
     _authors = TitleCaseConverter.convertToTitleCase(_authors);
     _publisher = TitleCaseConverter.convertToTitleCase(_publisher);
 
+    final svgBarcode = Barcode.isbn().toSvg(_isbn, width: 250, height: 80, fontHeight: 0, textPadding: 0);
+    _svgBarcode = svgBarcode;
+
     ExtractYear extractYear = ExtractYear();
     _publicationYear = extractYear.extract(_publicationYear);
 
@@ -101,7 +107,8 @@ class SearchResultState extends State<SearchResult> {
       writeToCsv(isbn13, _title, _authors, _publisher, _publicationYear, _ddc);
     }
 
-    setState(() {});
+    setState(() {
+    });
   }
 
   String extractTextContent(dom.Element? element) {
@@ -119,9 +126,6 @@ class SearchResultState extends State<SearchResult> {
     }
     return buffer.toString();
   }
-
-
-
 
   Future<void> oclcClassifyLookup(String isbn) async {
     final webScraper = WebScraper('http://classify.oclc.org');
@@ -153,10 +157,6 @@ class SearchResultState extends State<SearchResult> {
         }
       }
     }
-
-
-
-
 
   Future<void> openLibraryLookup(String isbn) async {
     String url = "https://openlibrary.org/isbn/$isbn.json";
@@ -633,7 +633,7 @@ class SearchResultState extends State<SearchResult> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                             child: Column(
                               children: [
                                 Row(
@@ -723,13 +723,20 @@ class SearchResultState extends State<SearchResult> {
                               ],
                             ),
                           ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(100,10,100,30),
+                            child: SvgPicture.string(
+                              _svgBarcode ?? '',
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
                 )
             ],
-          )),
+          )
+      ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.fromLTRB(0, 0, 20, 20),
         child: FloatingActionButton(
