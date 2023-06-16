@@ -95,17 +95,18 @@ class SearchResultState extends State<SearchResult> {
     _authors = TitleCaseConverter.convertToTitleCase(_authors);
     _publisher = TitleCaseConverter.convertToTitleCase(_publisher);
 
+    if (isbn13 != ""){
+      _isbn = isbn13;
+    }
+
     final svgBarcode = Barcode.isbn().toSvg(_isbn, width: 250, height: 80, fontHeight: 0, textPadding: 0);
     _svgBarcode = svgBarcode;
 
     ExtractYear extractYear = ExtractYear();
     _publicationYear = extractYear.extract(_publicationYear);
 
-    if (isbn13 == ""){
-      writeToCsv(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
-    } else {
-      writeToCsv(isbn13, _title, _authors, _publisher, _publicationYear, _ddc);
-    }
+    writeToCsv(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
+
 
     setState(() {
     });
