@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.isbn_book_search_test_flutter">
    <application
-        android:label="ISBN Book Lookup"
+        android:label="ISBN Lookup"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

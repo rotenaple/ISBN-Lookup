@@ -48,7 +48,7 @@ class CustomKeyboard extends StatelessWidget {
             digit,
             style: const TextStyle(
               fontSize: 24.0,
-              color: AppTheme.primColor, // Set the desired text color
+              color: AppTheme.primaryColour, // Set the desired text color
             ),
           ),
         onPressed: () {
@@ -72,7 +72,7 @@ class CustomKeyboard extends StatelessWidget {
           child: const Icon(
             Icons.backspace,
             size: 24.0,
-            color: AppTheme.primColor,
+            color: AppTheme.primaryColour,
           ),
           onPressed: () {
             onKeyPressed('backspace');

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:isbn_book_search_test_flutter/settings_page.dart';
 import 'isbn_check.dart';
 import 'scan_page.dart';
 import 'search_result.dart';
@@ -8,7 +9,6 @@ import 'view_csv.dart';
 import 'custom_keyboard.dart';
 import 'desktop_keyboard.dart';
 import 'theme.dart';
-import 'package:flutter/material.dart';
 
 void main() => runApp(MaterialApp(home: Home()));
 
@@ -38,15 +38,93 @@ class Home extends StatelessWidget {
     }
   }
 
-  @override
   Widget build(BuildContext context) {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
+      key: scaffoldKey, // Assign the scaffoldKey to the Scaffold
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColour,
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'ISBN Lookup',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    'version 1.0.0\nby rotenaple',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              )
+            ),
+            ListTile(
+              title: const Text('Lookup History'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ViewCSVPage(),
+                  ),
+                );
+                scaffoldKey.currentState?.closeDrawer();
+              },
+            ),
+            ListTile(
+              title: const Text('Settings'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SettingsPage(),
+                    ),
+                  );
+                  scaffoldKey.currentState?.closeDrawer();
+                }
+            ),
+            ListTile(
+              title: const Text('About App'),
+              onTap: () {
+                // Handle the about app menu item tap event
+                scaffoldKey.currentState?.closeDrawer();
+                // Perform the desired action here
+              },
+            ),
+          ],
+        ),
+      ), //Drawer
       body: SafeArea(
         child: Row(
           children: <Widget>[
             Expanded(
               flex: 1,
-              child: Container(),
+              child: Padding(
+                padding: const EdgeInsets.all(30),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start, // Align items to the top
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        scaffoldKey.currentState?.openDrawer();
+                        // Open the sliding menu (drawer)
+                      },
+                      child: Icon(Icons.menu),
+                    ),
+                  ],
+                ),
+              ),
             ),
             Expanded(
               flex: 3,
@@ -54,7 +132,7 @@ class Home extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
 
                     child: Text(
@@ -76,15 +154,15 @@ class Home extends StatelessWidget {
                       String isbn = isbnController.text;
                       search(context, isbn);
                     },
-                    child: const Text('Search'),
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primColor), // Set the background color of the button to blue
+                      backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primaryColour), // Set the background color of the button to blue
                     ),
+                    child: const Text('Search'),
                   ),
                 ],
               ),
             ),
-            Expanded(
+            const Expanded(
               flex: 1,
               child: Column(),
             ),
@@ -106,7 +184,7 @@ class Home extends StatelessWidget {
                       MaterialPageRoute(builder: (context) => ScanPage()),
                     );
                   },
-                  backgroundColor: AppTheme.primColor,
+                  backgroundColor: AppTheme.primaryColour,
                   child: SvgPicture.asset(
                     'images/barcode_scanner.svg',
                     colorFilter: const ColorFilter.mode(
@@ -118,24 +196,10 @@ class Home extends StatelessWidget {
                   ),
                 ),
               const SizedBox(height: 16.0),
-              FloatingActionButton(
-                backgroundColor: AppTheme.primColor,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ViewCSVPage(),
-                    ),
-                  );
-                },
-                child: const Icon(Icons.history),
-              ),
             ],
           ),
         ),
       ),
-
-
     );
   }
 

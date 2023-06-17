@@ -1,5 +1,5 @@
 name: isbn_book_search_test_flutter
-description: A new Flutter project.
+description: An app to lookup book infomation based in ISBN.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -48,6 +48,7 @@ dependencies:
   html: ^0.15.0
   web_scraper: ^0.1.4
   barcode: ^2.2.4
+  shared_preferences: ^2.1.2
 
 dev_dependencies:
   flutter_test:

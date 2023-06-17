@@ -53,6 +53,7 @@ class SearchResultState extends State<SearchResult> {
   String _ddc = '';
   String _bookNew = '', _bookUsed = '', _destination = '';
   String _svgBarcode = '';
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -110,8 +111,8 @@ class SearchResultState extends State<SearchResult> {
     writeToCsv(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
 
 
-    setState(() {
-    });
+    setState(() {});
+    _isLoading = false;
   }
 
   String extractTextContent(dom.Element? element) {
@@ -366,456 +367,456 @@ class SearchResultState extends State<SearchResult> {
     await file.writeAsString(csvLine, mode: FileMode.append);
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffffffff),
       body: SafeArea(
-          child: Column(
-            children: [
-              if (_coverlink.isNotEmpty)
-                Expanded(
-                  flex: 5,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Align(
-                        child: ColorFiltered(
-                          colorFilter: ColorFilter.mode(
-                            Colors.black.withOpacity(0.5),
-                            BlendMode.darken,
-                          ),
-                          child: Image.network(
-                            _coverlink,
-                            height: MediaQuery.of(context).size.height,
-                            width: MediaQuery.of(context).size.width,
-                            fit: BoxFit.fitWidth,
-                          ),
-                        ),
-                      ),
-                      Align(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                          child: Image.network(
-                            _coverlink,
-                            height: MediaQuery.of(context).size.height,
-                            width: MediaQuery.of(context).size.width,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              if (_title.isNotEmpty)
-                Expanded(
-                  flex: 12,
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
+        child: Visibility(
+          visible: !_isLoading,
+          child: SafeArea(
+              child: Column(
+                children: [
+                  if (_coverlink.isNotEmpty)
+                    Expanded(
+                      flex: 5,
+                      child: Stack(
+                        alignment: Alignment.center,
                         children: [
-                          if (_title.isNotEmpty)
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
-                                child: Text(
-                                  _title,
-                                  textAlign: TextAlign.start,
-                                  overflow: TextOverflow.clip,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontStyle: FontStyle.normal,
-                                    fontSize: 24,
-                                    color: Color(0xff000000),
-                                  ),
-                                ),
+                          Align(
+                            child: ColorFiltered(
+                              colorFilter: ColorFilter.mode(
+                                Colors.black.withOpacity(0.5),
+                                BlendMode.darken,
                               ),
-                            ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    if (_authors.isNotEmpty)
-                                      Text(
-                                        _authors,
-                                        textAlign: TextAlign.start,
-                                        overflow: TextOverflow.clip,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          fontStyle: FontStyle.normal,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                    if (_publisher.isNotEmpty)
-                                      Text(
-                                        _publisher,
-                                        textAlign: TextAlign.start,
-                                        overflow: TextOverflow.clip,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          fontStyle: FontStyle.normal,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              if (_publicationYear.isNotEmpty)
-                                Text(
-                                  _publicationYear,
-                                  textAlign: TextAlign.start,
-                                  overflow: TextOverflow.clip,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontStyle: FontStyle.normal,
-                                    color: Color(0xff000000),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          Container(
-                            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-                            padding: const EdgeInsets.all(0),
-                            width: MediaQuery.of(context).size.width,
-                            height: 1,
-                            decoration: BoxDecoration(
-                              color: const Color(0x1f000000),
-                              shape: BoxShape.rectangle,
-                              borderRadius: BorderRadius.zero,
-                              border: Border.all(color: const Color(0x4d9e9e9e), width: 1),
-                            ),
-                          ),
-                          if (_description.isNotEmpty)
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                _description,
-                                textAlign: TextAlign.start,
-                                overflow: TextOverflow.clip,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.normal,
-                                  color: Color(0xff000000),
-                                ),
-                              ),
-                            ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Expanded(
-                                  flex: 1,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      const Text(
-                                        "ISBN",
-                                        textAlign: TextAlign.start,
-                                        overflow: TextOverflow.clip,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle: FontStyle.normal,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                      Text(
-                                        _isbn,
-                                        textAlign: TextAlign.start,
-                                        overflow: TextOverflow.clip,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          fontStyle: FontStyle.normal,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                      const Padding(
-                                        padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                                        child: Text(
-                                          "New Price",
-                                          textAlign: TextAlign.start,
-                                          overflow: TextOverflow.clip,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle: FontStyle.normal,
-                                            color: Color(0xff000000),
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        "US\$ $_bookNew",
-                                        textAlign: TextAlign.start,
-                                        overflow: TextOverflow.clip,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          fontStyle: FontStyle.normal,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 1,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      const Text(
-                                        "DDC",
-                                        textAlign: TextAlign.start,
-                                        overflow: TextOverflow.clip,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle: FontStyle.normal,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                      Text(
-                                        _ddc,
-                                        textAlign: TextAlign.start,
-                                        overflow: TextOverflow.clip,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          fontStyle: FontStyle.normal,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                      const Padding(
-                                        padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                                        child: Text(
-                                          "Used Price",
-                                          textAlign: TextAlign.start,
-                                          overflow: TextOverflow.clip,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            fontStyle: FontStyle.normal,
-                                            color: Color(0xff000000),
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        "US\$ $_bookUsed",
-                                        textAlign: TextAlign.start,
-                                        overflow: TextOverflow.clip,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          fontStyle: FontStyle.normal,
-                                          color: Color(0xff000000),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-                            child: Text(
-                              "Prices from Abebooks, Shipping to $_destination",
-                              textAlign: TextAlign.start,
-                              overflow: TextOverflow.clip,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontStyle: FontStyle.normal,
-                                color: Color(0xff000000),
+                              child: Image.network(
+                                _coverlink,
+                                height: MediaQuery.of(context).size.height,
+                                width: MediaQuery.of(context).size.width,
+                                fit: BoxFit.fitWidth,
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
-                                        child: FilledButton(
-                                          onPressed: () {
-                                            launch('https://www.bookfinder.com/isbn/$_isbn/');
-                                          },
-                                          style: ButtonStyle(
-                                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
-                                            backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primColor),
-                                          ),
-                                          child: const Text(
-                                            "Search Bookfinder",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w400,
-                                              fontStyle: FontStyle.normal,
-                                            ),
-                                            maxLines: 2,
-                                            textAlign: TextAlign.center,
-
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
-                                        child: FilledButton(
-                                          onPressed: () {
-                                            launch('https://www.abebooks.com/servlet/SearchResults?kn=$_isbn');
-                                          },
-                                          style: ButtonStyle(
-                                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
-                                            backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primColor),
-                                          ),
-                                          child: const Text(
-                                            "Search Abebooks",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w400,
-                                              fontStyle: FontStyle.normal,
-                                            ),
-                                            maxLines: 2,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
-                                        child: FilledButton(
-                                          onPressed: () {
-                                            launch('https://openlibrary.org/isbn/$_isbn');
-                                          },
-                                          style: ButtonStyle(
-                                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
-                                            backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primColor),
-                                          ),
-                                          child: const Text(
-                                            "Search Open Library",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w400,
-                                              fontStyle: FontStyle.normal,
-                                            ),
-                                            maxLines: 2,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
-                                        child: FilledButton(
-                                          onPressed: () {
-                                            launch('https://www.goodreads.com/search?q=$_isbn');
-                                          },
-                                          style: ButtonStyle(
-                                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
-                                            backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primColor),
-                                          ),
-                                          child: const Text(
-                                            "Search Goodreads",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w400,
-                                              fontStyle: FontStyle.normal,
-                                            ),
-                                            maxLines: 2,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.max,
-
-                                  children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(10,5,10,0),
-                                        child: FilledButton(
-                                          onPressed: () {
-                                            launch('https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews');
-                                          },
-                                          style: ButtonStyle(
-                                            padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
-                                            backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primColor),
-                                          ),
-                                          child: const Text(
-                                            "Search Findit\u200b@Flinders",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w400,
-                                              fontStyle: FontStyle.normal,
-                                            ),
-                                            maxLines: 3,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                          Align(
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                              child: Image.network(
+                                _coverlink,
+                                height: MediaQuery.of(context).size.height,
+                                width: MediaQuery.of(context).size.width,
+                                fit: BoxFit.contain,
+                              ),
                             ),
-                          ),
-
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(100, 15, 100, 5),
-                            child: _svgBarcode.isNotEmpty ? SvgPicture.string(_svgBarcode) : const SizedBox(height: 80,),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                )
-            ],
-          )
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 5, 5),
-        child: FloatingActionButton(
-          backgroundColor: AppTheme.primColor,
-          onPressed: () {
-            ScanPageState.isScanning = false;
-            Navigator.pop(context);
-          },
-          child: const Icon(Icons.arrow_back),
+                  if (_title.isNotEmpty)
+                    Expanded(
+                      flex: 12,
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              if (_title.isNotEmpty)
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(0, 10, 0, 5),
+                                    child: Text(
+                                      _title,
+                                      textAlign: TextAlign.start,
+                                      overflow: TextOverflow.clip,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontStyle: FontStyle.normal,
+                                        fontSize: 24,
+                                        color: Color(0xff000000),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        if (_authors.isNotEmpty)
+                                          Text(
+                                            _authors,
+                                            textAlign: TextAlign.start,
+                                            overflow: TextOverflow.clip,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontStyle: FontStyle.normal,
+                                              color: Color(0xff000000),
+                                            ),
+                                          ),
+                                        if (_publisher.isNotEmpty)
+                                          Text(
+                                            _publisher,
+                                            textAlign: TextAlign.start,
+                                            overflow: TextOverflow.clip,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontStyle: FontStyle.normal,
+                                              color: Color(0xff000000),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (_publicationYear.isNotEmpty)
+                                    Text(
+                                      _publicationYear,
+                                      textAlign: TextAlign.start,
+                                      overflow: TextOverflow.clip,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        fontStyle: FontStyle.normal,
+                                        color: Color(0xff000000),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              Container(
+                                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+                                padding: const EdgeInsets.all(0),
+                                width: MediaQuery.of(context).size.width,
+                                height: 1,
+                                decoration: BoxDecoration(
+                                  color: const Color(0x1f000000),
+                                  shape: BoxShape.rectangle,
+                                  borderRadius: BorderRadius.zero,
+                                  border: Border.all(color: const Color(0x4d9e9e9e), width: 1),
+                                ),
+                              ),
+                              if (_description.isNotEmpty)
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    _description,
+                                    textAlign: TextAlign.start,
+                                    overflow: TextOverflow.clip,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontStyle: FontStyle.normal,
+                                      color: Color(0xff000000),
+                                    ),
+                                  ),
+                                ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Expanded(
+                                      flex: 1,
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          const Text(
+                                            "ISBN",
+                                            textAlign: TextAlign.start,
+                                            overflow: TextOverflow.clip,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              fontStyle: FontStyle.normal,
+                                              color: Color(0xff000000),
+                                            ),
+                                          ),
+                                          Text(
+                                            _isbn,
+                                            textAlign: TextAlign.start,
+                                            overflow: TextOverflow.clip,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontStyle: FontStyle.normal,
+                                              color: Color(0xff000000),
+                                            ),
+                                          ),
+                                          const Padding(
+                                            padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                                            child: Text(
+                                              "New Price",
+                                              textAlign: TextAlign.start,
+                                              overflow: TextOverflow.clip,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontStyle: FontStyle.normal,
+                                                color: Color(0xff000000),
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            "US\$ $_bookNew",
+                                            textAlign: TextAlign.start,
+                                            overflow: TextOverflow.clip,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontStyle: FontStyle.normal,
+                                              color: Color(0xff000000),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 1,
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          const Text(
+                                            "DDC",
+                                            textAlign: TextAlign.start,
+                                            overflow: TextOverflow.clip,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              fontStyle: FontStyle.normal,
+                                              color: Color(0xff000000),
+                                            ),
+                                          ),
+                                          Text(
+                                            _ddc,
+                                            textAlign: TextAlign.start,
+                                            overflow: TextOverflow.clip,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontStyle: FontStyle.normal,
+                                              color: Color(0xff000000),
+                                            ),
+                                          ),
+                                          const Padding(
+                                            padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                                            child: Text(
+                                              "Used Price",
+                                              textAlign: TextAlign.start,
+                                              overflow: TextOverflow.clip,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                fontStyle: FontStyle.normal,
+                                                color: Color(0xff000000),
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            "US\$ $_bookUsed",
+                                            textAlign: TextAlign.start,
+                                            overflow: TextOverflow.clip,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontStyle: FontStyle.normal,
+                                              color: Color(0xff000000),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+                                child: Text(
+                                  "Prices from Abebooks, Shipping to $_destination",
+                                  textAlign: TextAlign.start,
+                                  overflow: TextOverflow.clip,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontStyle: FontStyle.normal,
+                                    color: Color(0xff000000),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: Padding(
+                                            padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
+                                            child: FilledButton(
+                                              onPressed: () {
+                                                launch('https://www.bookfinder.com/isbn/$_isbn/');
+                                              },
+                                              style: ButtonStyle(
+                                                padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                                backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primaryColour),
+                                              ),
+                                              child: const Text(
+                                                "Search Bookfinder",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w400,
+                                                  fontStyle: FontStyle.normal,
+                                                ),
+                                                maxLines: 2,
+                                                textAlign: TextAlign.center,
+
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 1,
+                                          child: Padding(
+                                            padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
+                                            child: FilledButton(
+                                              onPressed: () {
+                                                launch('https://www.abebooks.com/servlet/SearchResults?kn=$_isbn');
+                                              },
+                                              style: ButtonStyle(
+                                                padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                                backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primaryColour),
+                                              ),
+                                              child: const Text(
+                                                "Search Abebooks",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w400,
+                                                  fontStyle: FontStyle.normal,
+                                                ),
+                                                maxLines: 2,
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: Padding(
+                                            padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
+                                            child: FilledButton(
+                                              onPressed: () {
+                                                launch('https://openlibrary.org/isbn/$_isbn');
+                                              },
+                                              style: ButtonStyle(
+                                                padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                                backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primaryColour),
+                                              ),
+                                              child: const Text(
+                                                "Search Open Library",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w400,
+                                                  fontStyle: FontStyle.normal,
+                                                ),
+                                                maxLines: 2,
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 1,
+                                          child: Padding(
+                                            padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
+                                            child: FilledButton(
+                                              onPressed: () {
+                                                launch('https://www.goodreads.com/search?q=$_isbn');
+                                              },
+                                              style: ButtonStyle(
+                                                padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                                backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primaryColour),
+                                              ),
+                                              child: const Text(
+                                                "Search Goodreads",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w400,
+                                                  fontStyle: FontStyle.normal,
+                                                ),
+                                                maxLines: 2,
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.max,
+
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: Padding(
+                                            padding: const EdgeInsets.fromLTRB(10,5,10,0),
+                                            child: FilledButton(
+                                              onPressed: () {
+                                                launch('https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews');
+                                              },
+                                              style: ButtonStyle(
+                                                padding: MaterialStateProperty.all(const EdgeInsets.all(12)),
+                                                backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primaryColour),
+                                              ),
+                                              child: const Text(
+                                                "Search Findit\u200b@Flinders",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w400,
+                                                  fontStyle: FontStyle.normal,
+                                                ),
+                                                maxLines: 3,
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(100, 15, 100, 5),
+                                child: _svgBarcode.isNotEmpty ? SvgPicture.string(_svgBarcode) : const SizedBox(height: 80,),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                ],
+              )
+          ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppTheme.primaryColour,
+        onPressed: () {
+          ScanPageState.isScanning = false;
+          Navigator.pop(context);
+        },
+        child: const Icon(Icons.arrow_back),
       ),
     );
   }
-
 }

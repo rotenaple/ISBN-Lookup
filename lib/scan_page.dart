@@ -125,7 +125,7 @@ class ScanPageState extends State<ScanPage> {
               children: [
                 FloatingActionButton(
                   onPressed: () {},
-                  backgroundColor: AppTheme.primColor,
+                  backgroundColor: AppTheme.primaryColour,
                   child: IconButton(
                     icon: const Icon(Icons.keyboard),
                     onPressed: () {
@@ -134,18 +134,6 @@ class ScanPageState extends State<ScanPage> {
                   ),
                 ),
                 const SizedBox(height: 16.0),
-                FloatingActionButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ViewCSVPage(),
-                      ),
-                    );
-                  },
-                  backgroundColor: AppTheme.primColor,
-                  child: const Icon(Icons.history),
-                ),
               ],
             ),
           ),

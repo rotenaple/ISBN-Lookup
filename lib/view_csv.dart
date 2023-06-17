@@ -71,9 +71,9 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+              padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
               child: Container(
-                color: Colors.transparent, // Set the background color to blue
+                color: Colors.transparent,
                 padding: const EdgeInsets.fromLTRB(20,10,20,0),
                 child: const Text(
                   'Lookup History',
@@ -110,6 +110,9 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                               onPressed: () {
                                 Navigator.pop(context); // Return to the previous page
                               },
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primaryColour), // Set the background color of the button to blue
+                              ),
                               child: const Text('Go Back'),
                             ),
                           ],
@@ -194,12 +197,15 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                             style: TextStyle(fontSize: 16),
                           ),
                           const SizedBox(height: 16),
-                          ElevatedButton(
+                          FilledButton(
                             onPressed: () {
                               Navigator.pop(context); // Return to the previous page
                             },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primaryColour), // Set the background color of the button to blue
+                            ),
                             child: const Text('Go Back'),
-                          ),
+                          )
                         ],
                       ),
                     );
@@ -215,60 +221,13 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 5, 5),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.end, // Align the column to the bottom
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              if (kDebugMode) // Conditionally show the button in debug mode
-                FloatingActionButton(
-                  onPressed: () async {
-                    final confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          content: Text('Are you sure you want to delete all records?'),
-                          actions: [
-                            TextButton(
-                              child: Text('Cancel'),
-                              onPressed: () {
-                                Navigator.of(context).pop(false); // Return false to indicate cancellation
-                              },
-                            ),
-                            TextButton(
-                              child: const Text(
-                                'Delete',
-                                style: TextStyle(
-                                  color: Colors.red, // Set the text color to red
-                                ),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pop(true); // Return true to indicate confirmation
-                              },
-                            )
-                          ],
-                        );
-                      },
-                    );
-
-                    if (confirmed == true) {
-                      final directory = await getApplicationDocumentsDirectory();
-                      final filePath = '${directory.path}/output.csv';
-                      final file = File(filePath);
-                      final exists = await file.exists();
-
-                      if (exists) {
-                        await file.delete();
-                        refreshPage(); // Refresh the page after deleting the file
-                      }
-                    }
-                  },
-                  backgroundColor: Colors.red, // Set the button color to red
-                  child: const Icon(Icons.delete_forever),
-                ),
-              const SizedBox(height: 16.0), // Add spacing between the two FloatingActionButton
               FloatingActionButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                backgroundColor: AppTheme.primColor,
+                backgroundColor: AppTheme.primaryColour,
                 child: const Icon(Icons.arrow_back),
               ),
             ],
