@@ -9,6 +9,7 @@ import 'view_csv.dart';
 import 'custom_keyboard.dart';
 import 'desktop_keyboard.dart';
 import 'theme.dart';
+import 'scan_page.dart';
 
 void main() => runApp(MaterialApp(home: Home()));
 
@@ -154,10 +155,10 @@ class Home extends StatelessWidget {
                       String isbn = isbnController.text;
                       search(context, isbn);
                     },
+                    child: const Text('Search'),
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primaryColour), // Set the background color of the button to blue
                     ),
-                    child: const Text('Search'),
                   ),
                 ],
               ),
