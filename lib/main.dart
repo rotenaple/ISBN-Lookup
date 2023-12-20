@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:isbn_book_search_test_flutter/settings_page.dart';
+import 'package:isbnsearch_flutter/settings_page.dart';
 import 'isbn_check.dart';
 import 'scan_page.dart';
 import 'search_result.dart';

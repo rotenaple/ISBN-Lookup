@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:isbn_book_search_test_flutter/theme.dart';
-import 'package:isbn_book_search_test_flutter/view_csv.dart';
+import 'package:isbnsearch_flutter/theme.dart';
+import 'package:isbnsearch_flutter/view_csv.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:isbn_book_search_test_flutter/isbn_check.dart';
+import 'package:isbnsearch_flutter/isbn_check.dart';
 import 'search_result.dart';
 
 

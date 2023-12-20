@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
-import 'package:isbn_book_search_test_flutter/theme.dart';
+import 'package:isbnsearch_flutter/theme.dart';
 
 class CustomKeyboard extends StatelessWidget {
   final Function(String) onKeyPressed;
