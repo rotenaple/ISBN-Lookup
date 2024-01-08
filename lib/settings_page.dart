@@ -221,8 +221,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   Navigator.pop(context);
                 },
                 backgroundColor: AppTheme.primaryColour,
-                child: const Icon(Icons.arrow_back),
+                child: const Icon(Icons.arrow_back,
+                  color: Color(0xffFFFFFF),
+                ),
               ),
+              const SizedBox(height: 16.0),
             ],
           ),
         ),

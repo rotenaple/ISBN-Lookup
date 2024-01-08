@@ -128,6 +128,7 @@ class ScanPageState extends State<ScanPage> {
                   backgroundColor: AppTheme.primaryColour,
                   child: IconButton(
                     icon: const Icon(Icons.keyboard),
+                    color: Color(0xffFFFFFF),
                     onPressed: () {
                       Navigator.pop(context);
                     },
