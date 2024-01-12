@@ -1,8 +1,15 @@
-Book Search App
-===============
+#ISBN Lookup
 
-The Book Search App is a Dart Flutter application that allows users to search for book information by entering the ISBN number or scanning the barcode. The app retrieves key details such as the title, cover image, introduction, and Dewey Decimal Classification (DDC) number. It provides a user-friendly interface for easy navigation and efficient book searching.
+ISBN Lookup is an intuitive and user-friendly Flutter application designed to simplify the process of searching for books using their ISBN (International Standard Book Number). This application is perfect for book enthusiasts, librarians, and anyone in need of quick and accurate book information.
 
-![App Demo](https://github.com/rotenaple/isbnsearch_flutter/blob/main/app%20demo.png)
+##Key Features
 
-The app integrates with book database API's for data retrieval and utilizes barcode scanning functionality for convenient input.
+- ISBN Validation: Ensures the ISBN entered is in a valid format, supporting both ISBN-10 and ISBN-13.
+- Barcode Scanning: Utilises the device's camera for scanning ISBN barcodes, making the search process effortless.
+- Search History: Keeps track of your previous searches, allowing easy access to past queries.
+- Customisable Settings (coming soon): Tailor the app to your preferences, enhancing your search experience.
+    Elegant UI: A clean and modern interface, with a focus on usability and readability.
+
+##Screenshots
+
+![App Demo](demo/screenshot.png)

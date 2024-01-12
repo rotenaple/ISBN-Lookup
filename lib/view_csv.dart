@@ -4,9 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:isbnsearch_flutter/theme.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+
 var printed = false;
 
 class ViewCSVPage extends StatefulWidget {
+  const ViewCSVPage({super.key});
+
   @override
   _ViewCSVPageState createState() => _ViewCSVPageState();
 }
@@ -20,13 +23,11 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
     refreshPage();
   }
 
-
   Future<List<String>> readCSVFile() async {
     final directory = await getApplicationDocumentsDirectory();
     final filePath = '${directory.path}/output.csv';
     final file = File(filePath);
     final exists = await file.exists();
-
 
     if (!exists) {
       return []; // Return an empty list to indicate no records yet
@@ -36,7 +37,6 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
       final csvData = await file.readAsString();
       final lines = csvData.split('\n');
       if (kDebugMode) {
-
         if (!printed) {
           print(csvData);
         }
@@ -47,11 +47,13 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
     }
   }
 
-  void copyBookInformationToClipboard(BuildContext context, String title, String author, String publisher, String isbn) {
-    final bookInfo = '$title\nAuthor: $author\nPublisher: $publisher\nISBN: $isbn';
+  void copyBookInformationToClipboard(BuildContext context, String title,
+      String author, String publisher, String isbn) {
+    final bookInfo =
+        '$title\nAuthor: $author\nPublisher: $publisher\nISBN: $isbn';
     Clipboard.setData(ClipboardData(text: bookInfo));
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Book information copied')),
+      const SnackBar(content: Text('Book information copied')),
     );
   }
 
@@ -74,14 +76,10 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
               padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
               child: Container(
                 color: Colors.transparent,
-                padding: const EdgeInsets.fromLTRB(20,10,20,0),
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
                 child: const Text(
                   'Lookup History',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  style: AppTheme.h1,
                 ),
               ),
             ),
@@ -96,24 +94,15 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                   } else if (snapshot.hasData) {
                     final csvData = snapshot.data!;
 
-                    if (csvData.isEmpty || csvData.every((line) => line.trim().isEmpty)) {
-                      return Center(
+                    if (csvData.isEmpty ||
+                        csvData.every((line) => line.trim().isEmpty)) {
+                      return const Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
+                            Text(
                               'No records yet',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            const SizedBox(height: 16),
-                            FilledButton(
-                              onPressed: () {
-                                Navigator.pop(context); // Return to the previous page
-                              },
-                              style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primaryColour), // Set the background color of the button to blue
-                              ),
-                              child: const Text('Go Back'),
+                              style: AppTheme.h2,
                             ),
                           ],
                         ),
@@ -137,42 +126,73 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
                               child: ListTile(
-                                title: Text(title),
+                                title: Text(
+                                  title,
+                                  style: AppTheme.boldTextStyle,
+                                ),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (author.trim().isNotEmpty) Text('by $author') else const Text(""),
-                                    Text(publisher.isNotEmpty && pubYear.isNotEmpty ? '$publisher $pubYear' : '$publisher$pubYear'),
-                                    Text('$isbn $dewey'),
+                                    if (author.trim().isNotEmpty)
+                                      Text(
+                                        'by $author',
+                                        style: AppTheme.normalTextStyle,
+                                      )
+                                    else
+                                      const Text(""),
+                                    Text(
+                                      publisher.isNotEmpty && pubYear.isNotEmpty
+                                          ? '$publisher $pubYear'
+                                          : '$publisher$pubYear',
+                                      style: AppTheme.normalTextStyle,
+                                    ),
+                                    Text(
+                                      '$isbn $dewey',
+                                      style: AppTheme.normalTextStyle,
+                                    ),
                                   ],
                                 ),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      icon: Icon(Icons.copy),
+                                      icon: const Icon(Icons.copy),
                                       onPressed: () {
-                                        copyBookInformationToClipboard(context, title, author, publisher, isbn);
+                                        copyBookInformationToClipboard(context,
+                                            title, author, publisher, isbn);
                                       },
                                     ),
                                     IconButton(
-                                      icon: Icon(Icons.delete),
+                                      icon: const Icon(Icons.delete),
                                       onPressed: () {
                                         showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                            content: Text('Are you sure you want to delete this record?'),
+                                            content: const Text(
+                                              'Are you sure you want to delete this record?',
+                                              style: AppTheme.normalTextStyle,
+                                            ),
                                             actions: [
                                               TextButton(
-                                                onPressed: () => Navigator.pop(context), // Cancel the deletion
-                                                child: Text('Cancel'),
+                                                onPressed: () => Navigator.pop(
+                                                    context), // Cancel the deletion
+                                                child: const Text(
+                                                  'Cancel',
+                                                  style:
+                                                      AppTheme.normalTextStyle,
+                                                ),
                                               ),
                                               TextButton(
                                                 onPressed: () {
-                                                  Navigator.pop(context); // Close the dialog
+                                                  Navigator.pop(
+                                                      context); // Close the dialog
                                                   deleteRowFromCSV(isbn);
                                                 },
-                                                child: Text('Delete'),
+                                                child: const Text(
+                                                  'Delete',
+                                                  style:
+                                                      AppTheme.warningTextStyle,
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -188,24 +208,15 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                       },
                     );
                   } else {
-                    return Center(
+                    return const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
+                          Text(
                             'Failed to load the CSV file.',
-                            style: TextStyle(fontSize: 16),
+                            style: AppTheme.h2,
                           ),
-                          const SizedBox(height: 16),
-                          FilledButton(
-                            onPressed: () {
-                              Navigator.pop(context); // Return to the previous page
-                            },
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(AppTheme.primaryColour), // Set the background color of the button to blue
-                            ),
-                            child: const Text('Go Back'),
-                          )
+                          SizedBox(height: 16),
                         ],
                       ),
                     );
@@ -214,28 +225,6 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
               ),
             ),
           ],
-        ),
-      ),
-      floatingActionButton: Align(
-        alignment: Alignment.bottomRight,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 5, 5),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              FloatingActionButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                backgroundColor: AppTheme.primaryColour,
-                child: const Icon(Icons.arrow_back,
-                  color: Color(0xffFFFFFF),
-                ),
-
-              ),
-              const SizedBox(height: 16.0),
-            ],
-          ),
         ),
       ),
     );
@@ -262,7 +251,7 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
         csvData.removeAt(index);
 
         // Join the updated CSV data back into a string
-        final updatedCsvString = csvData.join('\n') + '\n';
+        final updatedCsvString = '${csvData.join('\n')}\n';
 
         // Write the updated CSV string back to the file
         await file.writeAsString(updatedCsvString);
@@ -274,5 +263,4 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
       print('Failed to delete row from CSV: $e');
     }
   }
-
 }

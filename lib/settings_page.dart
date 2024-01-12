@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:isbnsearch_flutter/theme.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -8,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
@@ -16,7 +17,6 @@ class _SettingsPageState extends State<SettingsPage> {
   late SharedPreferences sharedPreferences;
   bool isDarkModeEnabled = false;
   bool isImgLookupDisabled = false;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -56,183 +56,147 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       body: SafeArea(
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
-                  child: Container(
-                    color: Colors.transparent,
-                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                    child: const Text(
-                      'Settings',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
-                InkWell(
-                  onTap: () {
-                    toggleDarkMode(!isDarkModeEnabled);
-                  },
-                  child: Card(
-                    child: ListTile(
-                      title: const Text(
-                        'Dark Mode',
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                      trailing: Switch(
-                        value: isDarkModeEnabled,
-                        activeColor: AppTheme.primaryColour,
-                        activeTrackColor: AppTheme.altPrimColour,
-                        inactiveThumbColor: AppTheme.backgroundColour,
-                        inactiveTrackColor: AppTheme.unselectedColour,
-                        onChanged: toggleDarkMode,
-                      ),
-                    ),
-                  ),
-                ),
-                InkWell(
-                  onTap: () {
-                    toggleImgLookup(!isImgLookupDisabled);
-                  },
-                  child: Card(
-                    child: ListTile(
-                      title: const Text(
-                        'Disable Image Search',
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                      trailing: Switch(
-                        value: isImgLookupDisabled,
-                        activeColor: AppTheme.primaryColour,
-                        activeTrackColor: AppTheme.altPrimColour,
-                        inactiveThumbColor: AppTheme.backgroundColour,
-                        inactiveTrackColor: AppTheme.unselectedColour,
-                        onChanged: toggleImgLookup,
-                      ),
-                    ),
-                  ),
-                ),
-                InkWell(
-                  onTap: () {},
-                  child: const Card(
-                    child: ListTile(
-                      title: Text(
-                        'Set Custom Search Button',
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                InkWell(
-                  onTap: () {
-                    _exportFile();
-                  },
-                  child: const Card(
-                    child: ListTile(
-                      title: Text(
-                        'Export Lookup Records',
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                InkWell(
-                  onTap: () async {
-                    final confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          content: const Text(
-                              'Are you sure you want to delete all records?'),
-                          actions: [
-                            TextButton(
-                              child: const Text('Cancel'),
-                              onPressed: () {
-                                Navigator.of(context).pop(
-                                    false); // Return false to indicate cancellation
-                              },
-                            ),
-                            TextButton(
-                              child: const Text(
-                                'Delete',
-                                style: TextStyle(
-                                  color: AppTheme
-                                      .warningColour, // Set the text color to red
-                                ),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pop(
-                                    true); // Return true to indicate confirmation
-                              },
-                            )
-                          ],
-                        );
-                      },
-                    );
-
-                    if (confirmed == true) {
-                      final directory = await getApplicationDocumentsDirectory();
-                      final filePath = '${directory.path}/output.csv';
-                      final file = File(filePath);
-                      final exists = await file.exists();
-
-                      if (exists) {
-                        await file.delete();
-                      }
-                    }
-                  },
-                  child: const Card(
-                    child: ListTile(
-                      title: Text(
-                        'Delete Lookup Records',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: AppTheme.warningColour,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )
-      ),
-      floatingActionButton: Align(
-        alignment: Alignment.bottomRight,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 5, 5),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              FloatingActionButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                backgroundColor: AppTheme.primaryColour,
-                child: const Icon(Icons.arrow_back,
-                  color: Color(0xffFFFFFF),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
+              child: Container(
+                color: Colors.transparent,
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                child: const Text(
+                  'Settings',
+                  style: AppTheme.h1,
                 ),
               ),
-              const SizedBox(height: 16.0),
-            ],
-          ),
+            ),
+            InkWell(
+              onTap: () {
+                toggleDarkMode(!isDarkModeEnabled);
+              },
+              child: Card(
+                child: ListTile(
+                  title: const Text(
+                    'Dark Mode',
+                    style: AppTheme.normalTextStyle,
+                  ),
+                  trailing: Switch(
+                    value: isDarkModeEnabled,
+                    activeColor: AppTheme.primaryColour,
+                    activeTrackColor: AppTheme.altPrimColour,
+                    inactiveThumbColor: AppTheme.backgroundColour,
+                    inactiveTrackColor: AppTheme.unselectedColour,
+                    onChanged: toggleDarkMode,
+                  ),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                toggleImgLookup(!isImgLookupDisabled);
+              },
+              child: Card(
+                child: ListTile(
+                  title: const Text(
+                    'Disable Image Search',
+                    style: AppTheme.normalTextStyle,
+                  ),
+                  trailing: Switch(
+                    value: isImgLookupDisabled,
+                    activeColor: AppTheme.primaryColour,
+                    activeTrackColor: AppTheme.altPrimColour,
+                    inactiveThumbColor: AppTheme.backgroundColour,
+                    inactiveTrackColor: AppTheme.unselectedColour,
+                    onChanged: toggleImgLookup,
+                  ),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () {},
+              child: const Card(
+                child: ListTile(
+                  title: Text(
+                    'Set Custom Search Button',
+                    style: AppTheme.normalTextStyle,
+                  ),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                _exportFile();
+              },
+              child: const Card(
+                child: ListTile(
+                  title: Text(
+                    'Export Lookup Records',
+                    style: AppTheme.normalTextStyle,
+                  ),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      content: const Text(
+                        'Are you sure you want to delete all records?',
+                        style: AppTheme.normalTextStyle,
+                      ),
+                      actions: [
+                        TextButton(
+                          child: const Text(
+                            'Cancel',
+                            style: AppTheme.normalTextStyle,
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop(
+                                false); // Return false to indicate cancellation
+                          },
+                        ),
+                        TextButton(
+                          child: const Text(
+                            'Delete',
+                            style: AppTheme.warningTextStyle,
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop(
+                                true); // Return true to indicate confirmation
+                          },
+                        )
+                      ],
+                    );
+                  },
+                );
+
+                if (confirmed == true) {
+                  final directory = await getApplicationDocumentsDirectory();
+                  final filePath = '${directory.path}/output.csv';
+                  final file = File(filePath);
+                  final exists = await file.exists();
+
+                  if (exists) {
+                    await file.delete();
+                  }
+                }
+              },
+              child: const Card(
+                child: ListTile(
+                  title: Text(
+                    'Delete Lookup Records',
+                    style: AppTheme.warningTextStyle,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-      ),
+      )),
     );
   }
-
 
   Future<void> _exportFile() async {
     final directory = await getApplicationDocumentsDirectory();
@@ -248,9 +212,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
 
     try {
-      if (await Permission.storage
-          .request()
-          .isGranted) {
+      if (await Permission.storage.request().isGranted) {
         final downloadsDirectory = await getExternalStorageDirectory();
         final newFilePath = '${downloadsDirectory?.path}/output.csv';
         await file.copy(newFilePath);
@@ -270,10 +232,13 @@ class _SettingsPageState extends State<SettingsPage> {
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        duration: Duration(seconds: 2),
+        content: Text(
+          message,
+          style: AppTheme.normalTextStyle,
+        ),
+        backgroundColor: AppTheme.unselectedColour,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
-
 }

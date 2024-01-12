@@ -6,7 +6,7 @@ import 'package:isbnsearch_flutter/theme.dart';
 class CustomKeyboard extends StatelessWidget {
   final Function(String) onKeyPressed;
 
-  const CustomKeyboard({Key? key, required this.onKeyPressed}) : super(key: key);
+  const CustomKeyboard({super.key, required this.onKeyPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,6 @@ class CustomKeyboard extends StatelessWidget {
     );
   }
 
-
   Widget buildKeyboardRow(List<dynamic> keys) {
     return Row(
       children: keys.map((key) {
@@ -44,13 +43,14 @@ class CustomKeyboard extends StatelessWidget {
   Widget buildDigitButton(String digit) {
     return Expanded(
       child: TextButton(
-          child: Text(
-            digit,
-            style: const TextStyle(
-              fontSize: 24.0,
-              color: AppTheme.primaryColour, // Set the desired text color
-            ),
+        child: Text(
+          digit,
+          style: const TextStyle(
+            fontSize: 24.0,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.primaryColour, // Set the desired text color
           ),
+        ),
         onPressed: () {
           if (_isValidInput(digit)) {
             onKeyPressed(digit);
@@ -65,7 +65,8 @@ class CustomKeyboard extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onLongPress: () {
-          onKeyPressed('clear'); // Use 'clear' as the key identifier for the long-press on backspace
+          onKeyPressed(
+              'clear'); // Use 'clear' as the key identifier for the long-press on backspace
           _vibrateOnKeyPress();
         },
         child: TextButton(
@@ -98,10 +99,11 @@ class CustomKeyboard extends StatelessWidget {
 class CustomKeyboardTextField extends StatefulWidget {
   final TextEditingController controller;
 
-  const CustomKeyboardTextField({Key? key, required this.controller}) : super(key: key);
+  const CustomKeyboardTextField({super.key, required this.controller});
 
   @override
-  _CustomKeyboardTextFieldState createState() => _CustomKeyboardTextFieldState();
+  _CustomKeyboardTextFieldState createState() =>
+      _CustomKeyboardTextFieldState();
 }
 
 class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
@@ -135,8 +137,8 @@ class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
       builder: (BuildContext context) {
         return Theme(
           data: ThemeData(
-            canvasColor: Colors
-                .transparent, // Set the background color to transparent
+            canvasColor: Colors.transparent,
+            fontFamily: "Barlow",
           ),
           child: Container(
             color: Colors.white,
@@ -145,14 +147,12 @@ class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
               padding: const EdgeInsets.symmetric(vertical: 20.0),
               child: IntrinsicHeight(
                 child: CustomKeyboard(
-
                   onKeyPressed: (key) {
                     setState(() {
                       if (key == 'backspace') {
                         if (widget.controller.text.isNotEmpty) {
-                          widget.controller.text =
-                              widget.controller.text.substring(
-                                  0, widget.controller.text.length - 1);
+                          widget.controller.text = widget.controller.text
+                              .substring(0, widget.controller.text.length - 1);
                         }
                       } else if (key == 'clear') {
                         widget.controller.clear(); // Clear all text
