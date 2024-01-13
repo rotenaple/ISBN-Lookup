@@ -80,12 +80,7 @@ class SearchResultState extends State<SearchResult> {
       await googleBooksAPILookup(_isbn);
       await abeBooksAPILookup(_isbn);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          duration: Duration(milliseconds: 500),
-          content: Text('Invalid ISBN'),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(AppTheme.customSnackbar('Invalid ISBN'));
       return;
     }
 
@@ -353,7 +348,7 @@ class SearchResultState extends State<SearchResult> {
           );
 
     return Scaffold(
-      backgroundColor: const Color(0xffffffff),
+      backgroundColor: AppTheme.backgroundColour,
       body: SafeArea(
         child: Visibility(
           visible: !_isLoading,
@@ -366,7 +361,7 @@ class SearchResultState extends State<SearchResult> {
           BarcodeSearchState.isScanning = false;
           Navigator.pop(context);
         },
-        child: const Icon(Icons.arrow_back, color: AppTheme.backgroundColour),
+        child: Icon(Icons.arrow_back, color: AppTheme.altBackgroundColourLight),
       ),
     );
   }
@@ -435,7 +430,7 @@ class SearchResultState extends State<SearchResult> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 20, 20, 5),
+                  padding: const EdgeInsets.fromLTRB(0, 15, 20, 5),
                   child: Text(
                     _title,
                     style: AppTheme.h1,
@@ -486,7 +481,7 @@ class SearchResultState extends State<SearchResult> {
                 _description,
                 textAlign: TextAlign.justify,
                 overflow: TextOverflow.clip,
-                style: AppTheme.bodyTextStyle,
+                style: AppTheme.condTextStyle,
               ),
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
@@ -502,13 +497,13 @@ class SearchResultState extends State<SearchResult> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        TextGroupBlock(
+                        ResultTextBlock(
                           title: "ISBN",
                           content: _isbn,
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                          child: TextGroupBlock(
+                          child: ResultTextBlock(
                             title: "New Price",
                             content: "US\$ $_bookNew",
                           ),
@@ -523,13 +518,13 @@ class SearchResultState extends State<SearchResult> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        TextGroupBlock(
+                        ResultTextBlock(
                           title: "DDC",
                           content: _ddc,
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                          child: TextGroupBlock(
+                          child: ResultTextBlock(
                             title: "Used Price",
                             content: "US\$ $_bookUsed",
                           ),
@@ -544,9 +539,9 @@ class SearchResultState extends State<SearchResult> {
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
               child: Text(
                 "Prices from Abebooks, Shipping to $_destination",
+                style: AppTheme.normalTextStyle,
                 textAlign: TextAlign.start,
                 overflow: TextOverflow.clip,
-                style: AppTheme.h3,
               ),
             ),
             Padding(
@@ -554,48 +549,44 @@ class SearchResultState extends State<SearchResult> {
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Expanded(
-                        flex: 1,
-                        child: CustomButton(
+                      SizedBox(
+                        width: 170,
+                        child: SearchIconButton(
                           text: "Bookfinder",
                           icon: Icons.search,
                           link: 'https://www.bookfinder.com/isbn/$_isbn/',
                         ),
                       ),
-                      Expanded(
-                        flex: 1,
-                        child: CustomButton(
+                      SizedBox(
+                        width: 170,
+                        child: SearchIconButton(
                           text: "Abebooks",
                           icon: Icons.search,
                           link:
-                              'https://www.abebooks.com/servlet/SearchResults?kn=$_isbn',
+                          'https://www.abebooks.com/servlet/SearchResults?kn=$_isbn',
                         ),
                       ),
                     ],
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Expanded(
-                        flex: 1,
-                        child: CustomButton(
+                      SizedBox(
+                        width: 170,
+                        child: SearchIconButton(
                           text: "Open Library",
                           icon: Icons.search,
                           link: 'https://openlibrary.org/isbn/$_isbn',
                         ),
                       ),
-                      Expanded(
-                        flex: 1,
-                        child: CustomButton(
+                      SizedBox(
+                        width: 170,
+                        child: SearchIconButton(
                           text: "Goodreads",
                           icon:
-                              Icons.search, // This is the magnifying glass icon
+                          Icons.search, // This is the magnifying glass icon
                           link: 'https://www.goodreads.com/search?q=$_isbn',
                         ),
                       ),
@@ -603,17 +594,15 @@ class SearchResultState extends State<SearchResult> {
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
                     children: [
-                      Expanded(
-                        flex: 1,
-                        child: CustomButton(
+                      SizedBox(
+                        width: 220,
+                        child: SearchIconButton(
                           text: "Findit@Flinders",
                           icon:
-                              Icons.search, // This is the magnifying glass icon
+                          Icons.search, // This is the magnifying glass icon
                           link:
-                              'https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews',
+                          'https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews',
                         ),
                       ),
                     ],
@@ -623,7 +612,7 @@ class SearchResultState extends State<SearchResult> {
             ),
             Padding(
                 padding: const EdgeInsets.fromLTRB(75, 10, 75, 10),
-                child: SvgPicture.string(_svgBarcode)),
+                child: SvgPicture.string(_svgBarcode, color: AppTheme.textColour,)),
           ],
         ),
       ),

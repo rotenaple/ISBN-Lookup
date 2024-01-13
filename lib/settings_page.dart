@@ -6,8 +6,27 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+class SharedPrefs {
+  static SharedPreferences? _sharedPrefs;
+
+  factory SharedPrefs() => SharedPrefs._internal();
+
+  SharedPrefs._internal();
+
+  Future init() async {
+    _sharedPrefs ??= await SharedPreferences.getInstance();
+  }
+
+  bool get isDarkModeEnabled => _sharedPrefs?.getBool('isDarkModeEnabled') ?? false;
+  set isDarkModeEnabled(bool value) => _sharedPrefs?.setBool('isDarkModeEnabled', value);
+
+  bool get isImgLookupDisabled => _sharedPrefs?.getBool('isImgLookupDisabled') ?? false;
+  set isImgLookupDisabled(bool value) => _sharedPrefs?.setBool('isImgLookupDisabled', value);
+}
+
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({Key? key});
+
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -54,149 +73,99 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColour,
       body: SafeArea(
           child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
-              child: Container(
-                color: Colors.transparent,
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                child: const Text(
-                  'Settings',
-                  style: AppTheme.h1,
-                ),
-              ),
-            ),
-            InkWell(
-              onTap: () {
-                toggleDarkMode(!isDarkModeEnabled);
-              },
-              child: Card(
-                child: ListTile(
-                  title: const Text(
-                    'Dark Mode',
-                    style: AppTheme.normalTextStyle,
-                  ),
-                  trailing: Switch(
-                    value: isDarkModeEnabled,
-                    activeColor: AppTheme.primaryColour,
-                    activeTrackColor: AppTheme.altPrimColour,
-                    inactiveThumbColor: AppTheme.backgroundColour,
-                    inactiveTrackColor: AppTheme.unselectedColour,
-                    onChanged: toggleDarkMode,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
+                  child: Container(
+                    color: Colors.transparent,
+                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                    child: Text(
+                      'Settings',
+                      style: AppTheme.h1,
+                    ),
                   ),
                 ),
-              ),
-            ),
-            InkWell(
-              onTap: () {
-                toggleImgLookup(!isImgLookupDisabled);
-              },
-              child: Card(
-                child: ListTile(
-                  title: const Text(
-                    'Disable Image Search',
-                    style: AppTheme.normalTextStyle,
-                  ),
-                  trailing: Switch(
-                    value: isImgLookupDisabled,
-                    activeColor: AppTheme.primaryColour,
-                    activeTrackColor: AppTheme.altPrimColour,
-                    inactiveThumbColor: AppTheme.backgroundColour,
-                    inactiveTrackColor: AppTheme.unselectedColour,
-                    onChanged: toggleImgLookup,
-                  ),
-                ),
-              ),
-            ),
-            InkWell(
-              onTap: () {},
-              child: const Card(
-                child: ListTile(
-                  title: Text(
-                    'Set Custom Search Button',
-                    style: AppTheme.normalTextStyle,
-                  ),
-                ),
-              ),
-            ),
-            InkWell(
-              onTap: () {
-                _exportFile();
-              },
-              child: const Card(
-                child: ListTile(
-                  title: Text(
-                    'Export Lookup Records',
-                    style: AppTheme.normalTextStyle,
-                  ),
-                ),
-              ),
-            ),
-            InkWell(
-              onTap: () async {
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      content: const Text(
-                        'Are you sure you want to delete all records?',
-                        style: AppTheme.normalTextStyle,
-                      ),
-                      actions: [
-                        TextButton(
-                          child: const Text(
-                            'Cancel',
-                            style: AppTheme.normalTextStyle,
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).pop(
-                                false); // Return false to indicate cancellation
-                          },
-                        ),
-                        TextButton(
-                          child: const Text(
-                            'Delete',
-                            style: AppTheme.warningTextStyle,
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).pop(
-                                true); // Return true to indicate confirmation
-                          },
-                        )
-                      ],
-                    );
+                CustomSettingSwitchCard(
+                  onTap: () {
+                    toggleDarkMode(!isDarkModeEnabled);
                   },
-                );
-
-                if (confirmed == true) {
-                  final directory = await getApplicationDocumentsDirectory();
-                  final filePath = '${directory.path}/output.csv';
-                  final file = File(filePath);
-                  final exists = await file.exists();
-
-                  if (exists) {
-                    await file.delete();
-                  }
-                }
-              },
-              child: const Card(
-                child: ListTile(
-                  title: Text(
-                    'Delete Lookup Records',
-                    style: AppTheme.warningTextStyle,
-                  ),
+                  title: 'Dark Mode',
+                  switchValue: isDarkModeEnabled,
+                  onSwitchChanged: toggleDarkMode,
                 ),
-              ),
+                CustomSettingSwitchCard(
+                  onTap: () {
+                    toggleImgLookup(!isImgLookupDisabled);
+                  },
+                  title: 'Disable Image Search',
+                  switchValue: isImgLookupDisabled,
+                  onSwitchChanged: toggleImgLookup,
+                ),
+                CustomSettingCard(
+                  onTap: () {
+                    // Define action for 'Set Custom Search Button'
+                  },
+                  title: 'Set Custom Search Button',
+                ),
+                CustomSettingCard(
+                  onTap: () {
+                    _exportFile();
+                  },
+                  title: 'Export Lookup Records',
+                ),
+                CustomSettingCard(
+                  onTap: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: AppTheme.altBackgroundColour,
+                          title: Text(
+                              "Delete All Records",
+                          style: AppTheme.boldTextStyle,),
+                          content: Text(
+                            'Are you sure you want to delete all records?',
+                            style: AppTheme.dialogContentStyle, // Apply dialog content style here
+                          ),
+                          actions: [
+                            TextButton(
+                              child: Text('Cancel', style: AppTheme.dialogButtonStyle), // Apply dialog button style
+                              onPressed: () => Navigator.of(context).pop(false),
+                            ),
+                            TextButton(
+                              child: Text('Delete', style: AppTheme.dialogAlertButtonStyle), // Apply dialog alert button style
+                              onPressed: () => Navigator.of(context).pop(true),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+
+                    if (confirmed == true) {
+                      final directory = await getApplicationDocumentsDirectory();
+                      final filePath = '${directory.path}/output.csv';
+                      final file = File(filePath);
+                      final exists = await file.exists();
+
+                      if (exists) {
+                        await file.delete();
+                      }
+                    }
+                  },
+                  title: 'Delete Lookup Records',
+                  textColor: AppTheme.warningColour,
+                ),
+              ],
             ),
-          ],
-        ),
-      )),
+          )),
     );
   }
+
 
   Future<void> _exportFile() async {
     final directory = await getApplicationDocumentsDirectory();
@@ -218,27 +187,14 @@ class _SettingsPageState extends State<SettingsPage> {
         await file.copy(newFilePath);
         print('File exported successfully.');
 
-        _showSnackBar('File exported successfully');
+        ScaffoldMessenger.of(context).showSnackBar(AppTheme.customSnackbar('File exported successfully'));
       } else {
         print('Permission to access storage denied.');
-        _showSnackBar('Permission to access storage denied');
+        ScaffoldMessenger.of(context).showSnackBar(AppTheme.customSnackbar('Permission to access storage denied'));
       }
     } catch (e) {
       print('Error exporting file: $e');
-      _showSnackBar('Error exporting file: $e');
+      AppTheme.customSnackbar('Error exporting file: $e');
     }
-  }
-
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: AppTheme.normalTextStyle,
-        ),
-        backgroundColor: AppTheme.unselectedColour,
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 }

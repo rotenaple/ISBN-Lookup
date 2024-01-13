@@ -1,16 +1,17 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:isbnsearch_flutter/settings_page.dart';
 import 'isbn_check.dart';
 import 'barcode_search.dart';
 import 'search_result.dart';
-import 'view_csv.dart';
+import 'lookup_history.dart';
 import 'custom_keyboard.dart';
 import 'desktop_keyboard.dart';
 import 'theme.dart';
 
-void main() => runApp(const MaterialApp(home: Home()));
+void main() => runApp(MaterialApp(home: Home()));
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -21,11 +22,23 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int _selectedIndex = 0;
+  bool darkMode = false;
+
+  void updateUIFromPrefs() {
+    darkMode = SharedPrefs().isDarkModeEnabled;
+  }
+
+  @override
+  void initState() {
+    SharedPrefs().init();
+    super.initState();
+    updateUIFromPrefs();
+  }
 
   static final List<Widget> _widgetOptions = <Widget>[
     TextboxSearch(),
     if (Platform.isAndroid) const BarcodeSearch(),
-    ViewCSVPage(),
+    LookupHistoryPage(),
     SettingsPage(),
   ];
 
@@ -37,7 +50,12 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: AppTheme.sysStatusBarColour,
+      systemNavigationBarColor: AppTheme.sysNavBarColour,
+    ));
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColour,
       body: SafeArea(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
@@ -62,19 +80,20 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   @override
   Widget build(BuildContext context) {
+
     List<NavigationDestination> destinations = [
-      const NavigationDestination(icon: Icon(Icons.keyboard), label: 'Search'),
+      NavigationDestination(icon: Icon(Icons.keyboard, color: AppTheme.textColour),label: 'Search'),
       if (Platform.isAndroid)
-        const NavigationDestination(
-          icon: Icon(Icons.camera),
+        NavigationDestination(
+          icon: Icon(Icons.camera, color: AppTheme.textColour),
           label: 'Scan Barcode',
         ),
-      const NavigationDestination(
-        icon: Icon(Icons.history),
+      NavigationDestination(
+        icon: Icon(Icons.history, color: AppTheme.textColour),
         label: 'History',
       ),
-      const NavigationDestination(
-        icon: Icon(Icons.settings),
+      NavigationDestination(
+        icon: Icon(Icons.settings, color: AppTheme.textColour),
         label: 'Settings',
       ),
     ];
@@ -82,6 +101,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return NavigationBarTheme(
       data: NavigationBarThemeData(
         labelTextStyle: MaterialStateProperty.all(AppTheme.normalTextStyle),
+        backgroundColor: AppTheme.altBackgroundColour,
+        indicatorColor: AppTheme.navIndicatorColour,
       ),
       child: NavigationBar(
         selectedIndex: widget.selectedIndex,
@@ -106,16 +127,7 @@ class TextboxSearch extends StatelessWidget {
         MaterialPageRoute(builder: (context) => SearchResult(isbn: isbn)),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          duration: Duration(milliseconds: 500),
-          content: Text(
-            'Invalid ISBN',
-            style: AppTheme.normalTextStyle,
-          ),
-          backgroundColor: AppTheme.unselectedColour,
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(AppTheme.customSnackbar('Invalid ISBN'));
     }
   }
 
@@ -166,7 +178,7 @@ class InputInstructions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
       child: Text(
         "Input an ISBN Number",
@@ -189,7 +201,9 @@ class SearchButton extends StatelessWidget {
         onPressed();
       },
       style: AppTheme.primaryButtonStyle,
-      child: const Text('Search'),
+      child: Text(
+        'Search',
+      ),
     );
   }
 }

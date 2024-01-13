@@ -7,14 +7,14 @@ import 'package:path_provider/path_provider.dart';
 
 var printed = false;
 
-class ViewCSVPage extends StatefulWidget {
-  const ViewCSVPage({super.key});
+class LookupHistoryPage extends StatefulWidget {
+  const LookupHistoryPage({Key? key});
 
   @override
-  _ViewCSVPageState createState() => _ViewCSVPageState();
+  _LookupHistoryPageState createState() => _LookupHistoryPageState();
 }
 
-class _ViewCSVPageState extends State<ViewCSVPage> {
+class _LookupHistoryPageState extends State<LookupHistoryPage> {
   List<String> csvData = [];
 
   @override
@@ -52,8 +52,7 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
     final bookInfo =
         '$title\nAuthor: $author\nPublisher: $publisher\nISBN: $isbn';
     Clipboard.setData(ClipboardData(text: bookInfo));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Book information copied')),
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Book information copied')),
     );
   }
 
@@ -68,6 +67,7 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColour,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -77,7 +77,7 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
               child: Container(
                 color: Colors.transparent,
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                child: const Text(
+                child: Text(
                   'Lookup History',
                   style: AppTheme.h1,
                 ),
@@ -88,7 +88,7 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                 future: readCSVFile(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
+                    return Center(
                       child: CircularProgressIndicator(),
                     );
                   } else if (snapshot.hasData) {
@@ -96,7 +96,7 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
 
                     if (csvData.isEmpty ||
                         csvData.every((line) => line.trim().isEmpty)) {
-                      return const Center(
+                      return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -139,7 +139,7 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                                         style: AppTheme.normalTextStyle,
                                       )
                                     else
-                                      const Text(""),
+                                      Text(""),
                                     Text(
                                       publisher.isNotEmpty && pubYear.isNotEmpty
                                           ? '$publisher $pubYear'
@@ -156,30 +156,33 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      icon: const Icon(Icons.copy),
+                                      icon: Icon(Icons.copy,color: AppTheme.textColour,),
                                       onPressed: () {
                                         copyBookInformationToClipboard(context,
                                             title, author, publisher, isbn);
                                       },
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.delete),
+                                      icon: Icon(Icons.delete,color: AppTheme.textColour,),
                                       onPressed: () {
                                         showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                            content: const Text(
+                                            backgroundColor: AppTheme.altBackgroundColour,
+                                            title: Text("Delete Record",
+                                            style: AppTheme.boldTextStyle,),
+                                            content: Text(
                                               'Are you sure you want to delete this record?',
-                                              style: AppTheme.normalTextStyle,
+                                              style: AppTheme.dialogContentStyle,
                                             ),
                                             actions: [
                                               TextButton(
                                                 onPressed: () => Navigator.pop(
                                                     context), // Cancel the deletion
-                                                child: const Text(
+                                                child: Text(
                                                   'Cancel',
                                                   style:
-                                                      AppTheme.normalTextStyle,
+                                                  AppTheme.dialogButtonStyle,
                                                 ),
                                               ),
                                               TextButton(
@@ -188,10 +191,10 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                                                       context); // Close the dialog
                                                   deleteRowFromCSV(isbn);
                                                 },
-                                                child: const Text(
+                                                child: Text(
                                                   'Delete',
                                                   style:
-                                                      AppTheme.warningTextStyle,
+                                                  AppTheme.dialogAlertButtonStyle,
                                                 ),
                                               ),
                                             ],
@@ -203,12 +206,13 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
                                 ),
                               ),
                             ),
+                            color: AppTheme.altBackgroundColour,
                           ),
                         );
                       },
                     );
                   } else {
-                    return const Center(
+                    return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -262,5 +266,88 @@ class _ViewCSVPageState extends State<ViewCSVPage> {
     } catch (e) {
       print('Failed to delete row from CSV: $e');
     }
+  }
+}
+
+class HeaderWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+      child: Text(
+        'Lookup History',
+        style: AppTheme.h1,
+      ),
+    );
+  }
+}
+
+class CSVDataList extends StatelessWidget {
+  final Future<List<String>> csvDataFuture;
+
+  CSVDataList({Key? key, required this.csvDataFuture}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<String>>(
+      future: csvDataFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        } else if (snapshot.hasData) {
+          final csvData = snapshot.data!;
+          return _buildCSVDataView(csvData, context);
+        } else {
+          return _buildErrorView();
+        }
+      },
+    );
+  }
+
+  Widget _buildCSVDataView(List<String> csvData, BuildContext context) {
+    if (csvData.isEmpty || csvData.every((line) => line.trim().isEmpty)) {
+      return Center(
+        child: Text('No records yet', style: AppTheme.h2),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: csvData.length - 1,
+      itemBuilder: (context, index) {
+        return CSVItem(row: csvData[index].split(','));
+      },
+    );
+  }
+
+  Widget _buildErrorView() {
+    return Center(
+      child: Text('Failed to load the CSV file.', style: AppTheme.h2),
+    );
+  }
+}
+
+class CSVItem extends StatelessWidget {
+  final List<String> row;
+
+  CSVItem({Key? key, required this.row}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final isbn = row[0];
+    final title = row[1];
+    final author = row[2];
+    final publisher = row[3];
+    final pubYear = row[4];
+    final dewey = row[5];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+      child: Card(
+        color: AppTheme.altBackgroundColour,
+        child: ListTile(
+          // ... rest of the ListTile code ...
+        ),
+      ),
+    );
   }
 }

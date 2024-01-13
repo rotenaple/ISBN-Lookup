@@ -6,13 +6,13 @@ import 'package:isbnsearch_flutter/theme.dart';
 class CustomKeyboard extends StatelessWidget {
   final Function(String) onKeyPressed;
 
-  const CustomKeyboard({super.key, required this.onKeyPressed});
+  CustomKeyboard({Key? key, required this.onKeyPressed});
 
   @override
   Widget build(BuildContext context) {
     return IntrinsicHeight(
       child: Container(
-        color: Colors.white,
+        color: AppTheme.altBackgroundColour,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -45,10 +45,10 @@ class CustomKeyboard extends StatelessWidget {
       child: TextButton(
         child: Text(
           digit,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24.0,
             fontWeight: FontWeight.w600,
-            color: AppTheme.primaryColour, // Set the desired text color
+            color: AppTheme.textColour,
           ),
         ),
         onPressed: () {
@@ -70,10 +70,10 @@ class CustomKeyboard extends StatelessWidget {
           _vibrateOnKeyPress();
         },
         child: TextButton(
-          child: const Icon(
+          child: Icon(
             Icons.backspace,
             size: 24.0,
-            color: AppTheme.primaryColour,
+            color: AppTheme.textColour,
           ),
           onPressed: () {
             onKeyPressed('backspace');
@@ -99,7 +99,7 @@ class CustomKeyboard extends StatelessWidget {
 class CustomKeyboardTextField extends StatefulWidget {
   final TextEditingController controller;
 
-  const CustomKeyboardTextField({super.key, required this.controller});
+  CustomKeyboardTextField({Key? key, required this.controller});
 
   @override
   _CustomKeyboardTextFieldState createState() =>
@@ -111,11 +111,12 @@ class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         border: OutlineInputBorder(),
         floatingLabelAlignment: FloatingLabelAlignment.center,
       ),
       textAlign: TextAlign.center,
+      style: AppTheme.normalTextStyle,
       maxLength: 13,
       keyboardType: TextInputType.text,
       inputFormatters: [
@@ -141,8 +142,7 @@ class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
             fontFamily: "Barlow",
           ),
           child: Container(
-            color: Colors.white,
-            // Set the background color of the container to match the keyboard color
+            color: AppTheme.altBackgroundColour,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 20.0),
               child: IntrinsicHeight(

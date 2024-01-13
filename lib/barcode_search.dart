@@ -29,6 +29,7 @@ class BarcodeSearchState extends State<BarcodeSearch> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColour,
       body: SafeArea(
           child: Padding(
               padding: EdgeInsets.fromLTRB(36, 80, 36, 80),
@@ -67,24 +68,15 @@ class BarcodeSearchState extends State<BarcodeSearch> {
                                 return;
                               }
                             }
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                duration: Duration(milliseconds: 500),
-                                content: Text(
-                                  'No Valid ISBN Found',
-                                  style: AppTheme.normalTextStyle,
-                                ),
-                                backgroundColor: AppTheme.unselectedColour,
-                              ),
-                            );
+                            ScaffoldMessenger.of(context).showSnackBar(AppTheme.customSnackbar('No Valid ISBN Found'),);
                           },
                         ),
                       ),
                     ),
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
                       child: Text(
-                        "Scan an ISBN Barcode to Learn More",
+                        "Scan an ISBN Barcode",
                         style: AppTheme.h2,
                       ),
                     )
