@@ -6,10 +6,12 @@ import 'package:flutter_svg/svg.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:isbnsearch_flutter/barcode_search.dart';
+import 'package:isbnsearch_flutter/settings_page.dart';
 import 'package:isbnsearch_flutter/theme.dart';
 import 'dart:ui';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'format_date.dart';
 import 'isbn_check.dart';
 import 'title_case_converter.dart';
@@ -52,11 +54,24 @@ class SearchResultState extends State<SearchResult> {
   String _bookNew = '', _bookUsed = '', _destination = '';
   String _svgBarcode = '';
   bool _isLoading = true;
+  String customSearchName = "";
+  String customSearchDomain = "";
 
   @override
   void initState() {
     super.initState();
+    loadPreferences();
     search(widget.isbn);
+  }
+
+  Future<void> loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      customSearchName =
+          prefs.getString('customSearchName') ?? ""; // Default value if not set
+      customSearchDomain = prefs.getString('customSearchDomain') ??
+          ""; // Adjust default as needed
+    });
   }
 
   void search(String isbn) async {
@@ -80,7 +95,8 @@ class SearchResultState extends State<SearchResult> {
       await googleBooksAPILookup(_isbn);
       await abeBooksAPILookup(_isbn);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(AppTheme.customSnackbar('Invalid ISBN'));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(AppTheme.customSnackbar('Invalid ISBN'));
       return;
     }
 
@@ -93,7 +109,7 @@ class SearchResultState extends State<SearchResult> {
     }
 
     final svgBarcode = Barcode.isbn()
-        .toSvg(_isbn, width: 250, height: 80, fontHeight: 0, textPadding: 0);
+        .toSvg(_isbn, width: 300, height: 80, fontHeight: 0, textPadding: 0);
     _svgBarcode = svgBarcode;
 
     ExtractYear extractYear = ExtractYear();
@@ -333,19 +349,12 @@ class SearchResultState extends State<SearchResult> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine if the orientation is landscape
     bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
     Widget content = isLandscape
-        ? Row(
-            // In landscape mode, use Row
-            children: buildChildren(isLandscape),
-          )
-        : Column(
-            // In portrait mode, use Column
-            children: buildChildren(isLandscape),
-          );
+        ? Row(children: buildChildren(isLandscape))
+        : Column(children: buildChildren(isLandscape));
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColour,
@@ -565,7 +574,7 @@ class SearchResultState extends State<SearchResult> {
                           text: "Abebooks",
                           icon: Icons.search,
                           link:
-                          'https://www.abebooks.com/servlet/SearchResults?kn=$_isbn',
+                              'https://www.abebooks.com/servlet/SearchResults?kn=$_isbn',
                         ),
                       ),
                     ],
@@ -586,7 +595,7 @@ class SearchResultState extends State<SearchResult> {
                         child: SearchIconButton(
                           text: "Goodreads",
                           icon:
-                          Icons.search, // This is the magnifying glass icon
+                              Icons.search, // This is the magnifying glass icon
                           link: 'https://www.goodreads.com/search?q=$_isbn',
                         ),
                       ),
@@ -598,11 +607,9 @@ class SearchResultState extends State<SearchResult> {
                       SizedBox(
                         width: 220,
                         child: SearchIconButton(
-                          text: "Findit@Flinders",
-                          icon:
-                          Icons.search, // This is the magnifying glass icon
-                          link:
-                          'https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,$_isbn&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews',
+                          text: SharedPrefs().customSearchName,
+                          icon: Icons.search,
+                          link: processCustomSearchUrl(_isbn),
                         ),
                       ),
                     ],
@@ -611,11 +618,21 @@ class SearchResultState extends State<SearchResult> {
               ),
             ),
             Padding(
-                padding: const EdgeInsets.fromLTRB(75, 10, 75, 10),
-                child: SvgPicture.string(_svgBarcode, color: AppTheme.textColour,)),
+              padding: const EdgeInsets.fromLTRB(75, 10, 75, 10),
+              child: SvgPicture.string(
+                _svgBarcode,
+                color: AppTheme.textColour,
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  String processCustomSearchUrl(String isbn) {
+    // Assuming customSearchDomain is a URL template with a placeholder for the ISBN
+    String urlTemplate = SharedPrefs().customSearchDomain;
+    return urlTemplate.replaceAll("[isbn]", isbn);
   }
 }

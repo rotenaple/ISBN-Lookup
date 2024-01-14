@@ -111,7 +111,7 @@ class _CustomKeyboardTextFieldState extends State<CustomKeyboardTextField> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         border: OutlineInputBorder(),
         floatingLabelAlignment: FloatingLabelAlignment.center,
       ),

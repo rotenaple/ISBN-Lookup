@@ -1,4 +1,5 @@
-import 'dart:ui';
+// ignore_for_file: prefer_const_constructors_in_immutables
+
 
 import 'package:flutter/material.dart';
 import 'package:isbnsearch_flutter/settings_page.dart';
@@ -7,14 +8,14 @@ import 'package:url_launcher/url_launcher.dart';
 class AppTheme {
   static bool get darkMode => SharedPrefs().isDarkModeEnabled;
 
-  static Color primaryColourLight = Color(0xFF002EA9);
-  static Color primaryColourDark = Color(0xFFA97C00);
+  static Color primaryColourLight = const Color(0xFF002EA9);
+  static Color primaryColourDark = const Color(0xFFA97C00);
   static Color get primaryColour {
     return darkMode ? primaryColourDark : primaryColourLight;
   }
 
-  static Color altPrimColourLight = Color(0xFF7182DB);
-  static Color altPrimColourDark = Color(0xFFFFF197);
+  static Color altPrimColourLight = const Color(0xFF7182DB);
+  static Color altPrimColourDark = const Color(0xFFFFF197);
   static Color get altPrimColour {
     return darkMode ? altPrimColourDark : AppTheme.altPrimColourLight;
   }
@@ -30,31 +31,41 @@ class AppTheme {
     return darkMode ? primaryColourDark : altPrimColourLight;
   }
 
-  static Color backgroundColourLight = Color(0xFFFFFFFF);
-  static Color backgroundColourDark = Color(0xFF000000);
+  static Color backgroundColourLight = const Color(0xFFFFFFFF);
+  static Color backgroundColourDark = const Color(0xFF000000);
   static Color get backgroundColour {
     return darkMode ? backgroundColourDark : backgroundColourLight;
   }
 
-  static Color altBackgroundColourLight = Color(0xFFE7E9F9);
-  static Color altBackgroundColuorDark = Color(0xFF282A36);
+  static Color altBackgroundColourLight = const Color(0xFFE7E9F9);
+  static Color altBackgroundColuorDark = const Color(0xFF282A36);
   static Color get altBackgroundColour {
     return darkMode ? altBackgroundColuorDark : altBackgroundColourLight;
   }
 
-  static Color textColourLight = Color(0xFF171717);
-  static Color textColourDark = Color(0xFFF8F8F2);
+  static Color textColourLight = const Color(0xFF171717);
+  static Color textColourDark = const Color(0xFFF8F8F2);
   static Color get textColour {
     return darkMode ? textColourDark : textColourLight;
   }
 
-  static Color unselectedColourLight = Color(0xFFD8D8D8);
-  static Color unselectedColourDark = Color(0xFF666666);
+  static Color unselectedTextColourLight = const Color(0xFF666666);
+  static Color unselectedTextColourDark = const Color(0xFFA2A2A2);
+  static Color get unselectedTextColour {
+    return darkMode ? unselectedTextColourDark : unselectedTextColourLight;
+  }
+
+  static Color unselectedColourLight = const Color(0xFFD8D8D8);
+  static Color unselectedColourDark = const Color(0xFF666666);
   static Color get unselectedColour {
     return darkMode ? unselectedColourDark : unselectedColourLight;
 }
 
-  static Color warningColour = Color(0xFFF44336);
+  static Color warningColourLight = const Color(0xFFE74C3C);
+  static Color warningColourDark = const Color(0xFFC0392B);
+  static Color get warningColour {
+    return darkMode ? warningColourDark : warningColourLight;
+  }
 
 
   static TextStyle get h1 => TextStyle(
@@ -84,6 +95,12 @@ class AppTheme {
     fontFamily: 'Barlow',
   );
 
+  static TextStyle get unselectedTextStyle => TextStyle(
+    fontWeight: darkMode ? FontWeight.w400 : FontWeight.w500,
+    color: unselectedTextColour,
+    fontFamily: 'Barlow',
+  );
+
   static TextStyle get condTextStyle => TextStyle(
       // Only used for large text block in book description to save space
     fontWeight: darkMode ? FontWeight.w400 : FontWeight.w500,
@@ -93,8 +110,8 @@ class AppTheme {
   );
 
   static TextStyle get warningTextStyle => TextStyle(
-    fontWeight: darkMode ? FontWeight.w400 : FontWeight.w500,
-    color: warningColour,
+    fontWeight: FontWeight.w500,
+    color: warningColourLight,
     fontFamily: 'Barlow',
   );
 
@@ -105,7 +122,7 @@ class AppTheme {
     fontFamily: 'Barlow',
   );
 
-  static TextStyle get buttonTextStyle => TextStyle(
+  static TextStyle get buttonTextStyle => const TextStyle(
     fontWeight: FontWeight.w500,
     fontFamily: 'Barlow',
   );
@@ -142,10 +159,16 @@ class AppTheme {
     );
   }
 
-  static ButtonStyle get primaryButtonStyle => ElevatedButton.styleFrom(
+  static ButtonStyle get filledButtonStyle => ElevatedButton.styleFrom(
     foregroundColor: altBackgroundColourLight,
     backgroundColor: primaryColour,
     textStyle: buttonTextStyle,
+  );
+
+  static ButtonStyle get filledWarningButtonStyle => ElevatedButton.styleFrom(
+    foregroundColor: AppTheme.backgroundColourLight,
+    backgroundColor: warningColourDark,
+    textStyle: AppTheme.boldTextStyle,
   );
 }
 
@@ -164,12 +187,12 @@ class SearchIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(5, 2.5, 5, 0),
+      padding: const EdgeInsets.fromLTRB(5, 2.5, 5, 2.5),
       child: FilledButton(
         onPressed: () {
           launch(link);
         },
-        style: AppTheme.primaryButtonStyle, // Use the predefined style,
+        style: AppTheme.filledButtonStyle, // Use the predefined style,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -218,11 +241,11 @@ class CustomCard extends StatelessWidget {
   final Widget? trailingWidget;
 
   const CustomCard({
-    Key? key,
+    super.key,
     required this.onTap,
     required this.title,
     this.trailingWidget,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -244,21 +267,17 @@ class CustomCard extends StatelessWidget {
 }
 
 class CustomSettingCard extends CustomCard {
-  final Color? textColor;
+  final TextStyle? textStyle;
 
   CustomSettingCard({
-    Key? key,
-    required VoidCallback onTap,
-    required String title,
-    this.textColor, // Optional parameter
-  }) : super(key: key, onTap: onTap, title: title);
+    super.key,
+    required super.onTap,
+    required super.title,
+    this.textStyle, // Optional parameter
+  });
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle textStyle = AppTheme.normalTextStyle.copyWith(
-      color: textColor ?? AppTheme.normalTextStyle.color, // Use provided textColor or default
-    );
-
     return Card(
       color: AppTheme.altBackgroundColour,
       child: InkWell(
@@ -267,7 +286,7 @@ class CustomSettingCard extends CustomCard {
         child: ListTile(
           title: Text(
             title,
-            style: textStyle,
+            style: textStyle ?? AppTheme.normalTextStyle,
           ),
         ),
       ),
@@ -284,16 +303,16 @@ class CustomSettingSwitchCard extends CustomSettingCard {
   final Color? inactiveTrackColor;
 
   CustomSettingSwitchCard({
-    Key? key,
-    required VoidCallback onTap,
-    required String title,
+    super.key,
+    required super.onTap,
+    required super.title,
     required this.switchValue,
     required this.onSwitchChanged,
     this.activeSwitchColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
     this.inactiveTrackColor,
-  }) : super(key: key, onTap: onTap, title: title);
+  });
 
   @override
   Widget build(BuildContext context) {

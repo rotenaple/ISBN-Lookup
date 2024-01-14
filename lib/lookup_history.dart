@@ -52,7 +52,7 @@ class _LookupHistoryPageState extends State<LookupHistoryPage> {
     final bookInfo =
         '$title\nAuthor: $author\nPublisher: $publisher\nISBN: $isbn';
     Clipboard.setData(ClipboardData(text: bookInfo));
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Book information copied')),
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Book information copied')),
     );
   }
 
@@ -88,7 +88,7 @@ class _LookupHistoryPageState extends State<LookupHistoryPage> {
                 future: readCSVFile(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
+                    return const Center(
                       child: CircularProgressIndicator(),
                     );
                   } else if (snapshot.hasData) {
@@ -122,92 +122,7 @@ class _LookupHistoryPageState extends State<LookupHistoryPage> {
 
                         return Padding(
                           padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                          child: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
-                              child: ListTile(
-                                title: Text(
-                                  title,
-                                  style: AppTheme.boldTextStyle,
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (author.trim().isNotEmpty)
-                                      Text(
-                                        'by $author',
-                                        style: AppTheme.normalTextStyle,
-                                      )
-                                    else
-                                      Text(""),
-                                    Text(
-                                      publisher.isNotEmpty && pubYear.isNotEmpty
-                                          ? '$publisher $pubYear'
-                                          : '$publisher$pubYear',
-                                      style: AppTheme.normalTextStyle,
-                                    ),
-                                    Text(
-                                      '$isbn $dewey',
-                                      style: AppTheme.normalTextStyle,
-                                    ),
-                                  ],
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(Icons.copy,color: AppTheme.textColour,),
-                                      onPressed: () {
-                                        copyBookInformationToClipboard(context,
-                                            title, author, publisher, isbn);
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.delete,color: AppTheme.textColour,),
-                                      onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            backgroundColor: AppTheme.altBackgroundColour,
-                                            title: Text("Delete Record",
-                                            style: AppTheme.boldTextStyle,),
-                                            content: Text(
-                                              'Are you sure you want to delete this record?',
-                                              style: AppTheme.dialogContentStyle,
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(
-                                                    context), // Cancel the deletion
-                                                child: Text(
-                                                  'Cancel',
-                                                  style:
-                                                  AppTheme.dialogButtonStyle,
-                                                ),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(
-                                                      context); // Close the dialog
-                                                  deleteRowFromCSV(isbn);
-                                                },
-                                                child: Text(
-                                                  'Delete',
-                                                  style:
-                                                  AppTheme.dialogAlertButtonStyle,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            color: AppTheme.altBackgroundColour,
-                          ),
+                          child: buildLookupRecordCard(title, author, publisher, isbn, dewey, pubYear),
                         );
                       },
                     );
@@ -220,7 +135,7 @@ class _LookupHistoryPageState extends State<LookupHistoryPage> {
                             'Failed to load the CSV file.',
                             style: AppTheme.h2,
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                         ],
                       ),
                     );
@@ -267,6 +182,88 @@ class _LookupHistoryPageState extends State<LookupHistoryPage> {
       print('Failed to delete row from CSV: $e');
     }
   }
+
+  Widget buildLookupRecordCard(title, author, publisher, isbn, dewey, pubYear) {
+    return Card(
+      color: AppTheme.altBackgroundColour,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
+        child: ListTile(
+          title: _buildTitleText(title),
+          subtitle: _buildSubtitle(author, publisher, isbn, dewey, pubYear),
+          trailing: _buildActionButtons(context, title, author, publisher, isbn),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitleText(String title) {
+    return Text(
+      title,
+      style: AppTheme.boldTextStyle,
+    );
+  }
+
+  Widget _buildSubtitle(String author, String publisher, String isbn, String dewey, String pubYear) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildAuthorText(author),
+        _buildPublisherYearText(publisher, pubYear),
+        _buildIsbnDeweyText(isbn, dewey),
+      ],
+    );
+  }
+
+  Widget _buildAuthorText(String author) {
+    return author.trim().isNotEmpty
+        ? Text('by $author', style: AppTheme.normalTextStyle)
+        : const Text("");
+  }
+
+  Widget _buildPublisherYearText(String publisher, String pubYear) {
+    return Text(
+      publisher.isNotEmpty && pubYear.isNotEmpty ? '$publisher $pubYear' : '$publisher$pubYear',
+      style: AppTheme.normalTextStyle,
+    );
+  }
+
+  Widget _buildIsbnDeweyText(String isbn, String dewey) {
+    return Text('$isbn $dewey', style: AppTheme.normalTextStyle);
+  }
+
+  Row _buildActionButtons(BuildContext context, String title, String author, String publisher, String isbn) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildIconButton(Icons.copy, () => copyBookInformationToClipboard(context, title, author, publisher, isbn)),
+        _buildIconButton(Icons.delete, () => _showDeleteDialog(context, isbn)),
+      ],
+    );
+  }
+
+  IconButton _buildIconButton(IconData icon, Function()? onPressed) {
+    return IconButton(
+      icon: Icon(icon, color: AppTheme.textColour),
+      onPressed: onPressed,
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, String isbn) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.altBackgroundColour,
+        title: Text("Delete Record", style: AppTheme.boldTextStyle),
+        content: Text('Are you sure you want to delete this record?', style: AppTheme.dialogContentStyle),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel', style: AppTheme.dialogButtonStyle)),
+          ElevatedButton(onPressed: () { Navigator.pop(context); deleteRowFromCSV(isbn); }, style: AppTheme.filledWarningButtonStyle, child: const Text('Delete')),
+        ],
+      ),
+    );
+  }
+
 }
 
 class HeaderWidget extends StatelessWidget {
@@ -285,7 +282,7 @@ class HeaderWidget extends StatelessWidget {
 class CSVDataList extends StatelessWidget {
   final Future<List<String>> csvDataFuture;
 
-  CSVDataList({Key? key, required this.csvDataFuture}) : super(key: key);
+  const CSVDataList({super.key, required this.csvDataFuture});
 
   @override
   Widget build(BuildContext context) {
@@ -293,7 +290,7 @@ class CSVDataList extends StatelessWidget {
       future: csvDataFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         } else if (snapshot.hasData) {
           final csvData = snapshot.data!;
           return _buildCSVDataView(csvData, context);
@@ -329,22 +326,16 @@ class CSVDataList extends StatelessWidget {
 class CSVItem extends StatelessWidget {
   final List<String> row;
 
-  CSVItem({Key? key, required this.row}) : super(key: key);
+  const CSVItem({super.key, required this.row});
 
   @override
   Widget build(BuildContext context) {
-    final isbn = row[0];
-    final title = row[1];
-    final author = row[2];
-    final publisher = row[3];
-    final pubYear = row[4];
-    final dewey = row[5];
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       child: Card(
         color: AppTheme.altBackgroundColour,
-        child: ListTile(
+        child: const ListTile(
           // ... rest of the ListTile code ...
         ),
       ),

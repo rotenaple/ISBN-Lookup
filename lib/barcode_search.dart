@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:isbnsearch_flutter/theme.dart';
@@ -17,7 +15,7 @@ class BarcodeSearch extends StatefulWidget {
 class BarcodeSearchState extends State<BarcodeSearch> {
   String? lastScan;
   String? thisScan;
-  static bool isScanning = false; // Flag to track scanning status
+  static bool isScanning = false;
 
   MobileScannerController controller = MobileScannerController(
     facing: CameraFacing.back,
@@ -32,7 +30,7 @@ class BarcodeSearchState extends State<BarcodeSearch> {
       backgroundColor: AppTheme.backgroundColour,
       body: SafeArea(
           child: Padding(
-              padding: EdgeInsets.fromLTRB(36, 80, 36, 80),
+              padding: const EdgeInsets.fromLTRB(36, 80, 36, 80),
               child: Align(
                 alignment: Alignment.center,
                 child: Column(
@@ -44,8 +42,9 @@ class BarcodeSearchState extends State<BarcodeSearch> {
                           fit: BoxFit.cover,
                           controller: controller,
                           onDetect: (capture) {
-                            if (isScanning)
+                            if (isScanning) {
                               return; // Ignore if already scanning
+                            }
                             if (kDebugMode) {
                               print("Scanning");
                             }
@@ -74,7 +73,7 @@ class BarcodeSearchState extends State<BarcodeSearch> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                       child: Text(
                         "Scan an ISBN Barcode",
                         style: AppTheme.h2,

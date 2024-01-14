@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:isbnsearch_flutter/settings_page.dart';
 import 'isbn_check.dart';
 import 'barcode_search.dart';
@@ -11,7 +10,7 @@ import 'custom_keyboard.dart';
 import 'desktop_keyboard.dart';
 import 'theme.dart';
 
-void main() => runApp(MaterialApp(home: Home()));
+void main() => runApp(const MaterialApp(home: Home()));
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -38,8 +37,8 @@ class _HomeState extends State<Home> {
   static final List<Widget> _widgetOptions = <Widget>[
     TextboxSearch(),
     if (Platform.isAndroid) const BarcodeSearch(),
-    LookupHistoryPage(),
-    SettingsPage(),
+    const LookupHistoryPage(),
+    const SettingsPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -179,7 +178,7 @@ class InputInstructions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
       child: Text(
         "Input an ISBN Number",
         textAlign: TextAlign.center,
@@ -200,10 +199,8 @@ class SearchButton extends StatelessWidget {
       onPressed: () {
         onPressed();
       },
-      style: AppTheme.primaryButtonStyle,
-      child: Text(
-        'Search',
-      ),
+      style: AppTheme.filledButtonStyle,
+      child: const Text('Search'),
     );
   }
 }
