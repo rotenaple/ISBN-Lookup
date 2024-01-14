@@ -9,26 +9,23 @@ class AppTheme {
   static bool get darkMode => SharedPrefs().isDarkModeEnabled;
 
   static Color primaryColourLight = const Color(0xFF002EA9);
-  static Color primaryColourDark = const Color(0xFFA97C00);
+  static Color primaryColourDark = const Color(0xFF7986CB);
   static Color get primaryColour {
     return darkMode ? primaryColourDark : primaryColourLight;
   }
-
-  static Color altPrimColourLight = const Color(0xFF7182DB);
-  static Color altPrimColourDark = const Color(0xFFFFF197);
   static Color get altPrimColour {
-    return darkMode ? altPrimColourDark : AppTheme.altPrimColourLight;
+    return darkMode ? primaryColourLight : AppTheme.primaryColourDark;
   }
 
   static Color get sysStatusBarColour {
     return darkMode ? backgroundColourDark : primaryColourLight;
   }
   static Color get sysNavBarColour {
-    return darkMode ? backgroundColourDark : altPrimColourLight;
+    return darkMode ? backgroundColourDark : primaryColourDark;
   }
 
   static Color get navIndicatorColour {
-    return darkMode ? primaryColourDark : altPrimColourLight;
+    return primaryColourDark;
   }
 
   static Color backgroundColourLight = const Color(0xFFFFFFFF);

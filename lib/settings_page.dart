@@ -58,12 +58,11 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> initializeSharedPreferences() async {
     sharedPreferences = await SharedPreferences.getInstance();
     setState(() {
-      isDarkModeEnabled =
-          sharedPreferences.getBool('isDarkModeEnabled')!;
-      isImgLookupDisabled =
-          sharedPreferences.getBool('isImgLookupDisabled')!;
-      customSearchName = sharedPreferences.getString('customSearchName')!;
-      customSearchDomain = sharedPreferences.getString('customSearchDomain')!;
+      isDarkModeEnabled = sharedPreferences.getBool('isDarkModeEnabled') ?? false;
+      isImgLookupDisabled = sharedPreferences.getBool('isImgLookupDisabled') ?? false;
+      customSearchName = sharedPreferences.getString('customSearchName') ?? "Findit@Flinders";
+      customSearchDomain = sharedPreferences.getString('customSearchDomain') ??
+          "https://flinders.primo.exlibrisgroup.com/discovery/search?query=any,contains,[isbn]&vid=61FUL_INST:FUL&tab=Everything&facet=rtype,exclude,reviews";
     });
   }
 
@@ -71,6 +70,7 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       isDarkModeEnabled = value;
       sharedPreferences.setBool('isDarkModeEnabled', value);
+
       if (kDebugMode) {
         print(value);
       }
@@ -132,68 +132,73 @@ class _SettingsPageState extends State<SettingsPage> {
                       builder: (BuildContext context, StateSetter setState) {
                         bool areFieldsNotEmpty = siteNameController.text.isNotEmpty && siteLinkController.text.isNotEmpty;
 
-                        return AlertDialog(
-                          backgroundColor: AppTheme.altBackgroundColour,
-                          title: Text('Custom Search Settings', style: AppTheme.boldTextStyle),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              TextField(
-                                controller: siteNameController,
-                                decoration: InputDecoration(
-                                  labelText: 'Site Name',
-                                  labelStyle: AppTheme.normalTextStyle,
-                                ),
-                                onChanged: (value) {
-                                  setState(() => areFieldsNotEmpty = value.isNotEmpty && siteLinkController.text.isNotEmpty);
-                                },
-                                maxLines: null,
-                                style: AppTheme.normalTextStyle,
-                              ),
-                              TextField(
-                                controller: siteLinkController,
-                                decoration: InputDecoration(
-                                    labelText: 'Site Link',
-                                    labelStyle: AppTheme.normalTextStyle),
-                                onChanged: (value) {
-                                  setState(() => areFieldsNotEmpty = value.isNotEmpty && siteNameController.text.isNotEmpty);
-                                },
-                                maxLines: null,
-                                style: AppTheme.normalTextStyle,
-                              ),
-                              Padding(padding: const EdgeInsets.only(top: 8),
-                              child: Text(
-                                'Use [isbn] as a placeholder in site link.\n'
-                                    'e.g. Use https://www.google.com/search?q=[isbn] to search on Google.',
-                                style: AppTheme.unselectedTextStyle,
-                              ))
+                        return Align(
+                          alignment: Alignment.center,
+                          child: SingleChildScrollView(
+                            child: AlertDialog(
+                              backgroundColor: AppTheme.altBackgroundColour,
+                              title: Text('Custom Search Settings', style: AppTheme.boldTextStyle),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  TextField(
+                                    controller: siteNameController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Site Name',
+                                      labelStyle: AppTheme.normalTextStyle,
+                                    ),
+                                    onChanged: (value) {
+                                      setState(() => areFieldsNotEmpty = value.isNotEmpty && siteLinkController.text.isNotEmpty);
+                                    },
+                                    maxLines: null,
+                                    style: AppTheme.normalTextStyle,
+                                  ),
+                                  TextField(
+                                    controller: siteLinkController,
+                                    decoration: InputDecoration(
+                                        labelText: 'Site Link',
+                                        labelStyle: AppTheme.normalTextStyle),
+                                    onChanged: (value) {
+                                      setState(() => areFieldsNotEmpty = value.isNotEmpty && siteNameController.text.isNotEmpty);
+                                    },
+                                    maxLines: null,
+                                    style: AppTheme.normalTextStyle,
+                                  ),
+                                  Padding(padding: const EdgeInsets.only(top: 8),
+                                      child: Text(
+                                        'Use [isbn] as a placeholder in site link.\n'
+                                            'e.g. Use https://www.google.com/search?q=[isbn] to search on Google.',
+                                        style: AppTheme.unselectedTextStyle,
+                                      ))
 
-                            ],
+                                ],
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text('Cancel', style: AppTheme.dialogButtonStyle),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                ElevatedButton(
+                                  style: AppTheme.filledButtonStyle,
+                                  onPressed: areFieldsNotEmpty ? () async {
+                                    String siteName = siteNameController.text;
+                                    String siteLink = siteLinkController.text;
+                                    sharedPreferences.setString('customSearchName', siteName);
+                                    sharedPreferences.setString('customSearchDomain', siteLink);
+                                    setState(() {
+                                      customSearchName = siteName;
+                                      customSearchDomain = siteLink;
+                                    });
+                                    Navigator.of(context).pop();
+                                  } : null,
+                                  child: const Text('Confirm'),
+                                ),
+                              ],
+                            ),
                           ),
-                          actions: <Widget>[
-                            TextButton(
-                              child: Text('Cancel', style: AppTheme.dialogButtonStyle),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            ElevatedButton(
-                              style: AppTheme.filledButtonStyle,
-                              onPressed: areFieldsNotEmpty ? () async {
-                                String siteName = siteNameController.text;
-                                String siteLink = siteLinkController.text;
-                                sharedPreferences.setString('customSearchName', siteName);
-                                sharedPreferences.setString('customSearchDomain', siteLink);
-                                setState(() {
-                                  customSearchName = siteName;
-                                  customSearchDomain = siteLink;
-                                });
-                                Navigator.of(context).pop();
-                              } : null,
-                              child: const Text('Confirm'),
-                            ),
-                          ],
                         );
                       },
                     );
