@@ -349,20 +349,16 @@ class SearchResultState extends State<SearchResult> {
 
   @override
   Widget build(BuildContext context) {
-    bool isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+    bool isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     Widget content = isLandscape
         ? Row(children: buildChildren(isLandscape))
         : Column(children: buildChildren(isLandscape));
 
-    return Scaffold(
+    return _isLoading ? _buildLoading() : Scaffold(
       backgroundColor: AppTheme.backgroundColour,
       body: SafeArea(
-        child: Visibility(
-          visible: !_isLoading,
-          child: SafeArea(child: content),
-        ),
+        child: content,
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppTheme.primaryColour,
@@ -371,6 +367,35 @@ class SearchResultState extends State<SearchResult> {
           Navigator.pop(context);
         },
         child: Icon(Icons.arrow_back, color: AppTheme.altBackgroundColourLight),
+      ),
+    );
+  }
+
+  Widget _buildLoading() {
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundColour,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  strokeWidth: 6,
+                  color: AppTheme.primaryColour,
+                ),
+              ),
+            ),
+            Text(
+              "Loading",
+              style: TextStyle(color: AppTheme.textColour),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -479,10 +504,9 @@ class SearchResultState extends State<SearchResult> {
               width: MediaQuery.of(context).size.width,
               height: 1,
               decoration: BoxDecoration(
-                color: const Color(0x1f000000),
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.zero,
-                border: Border.all(color: AppTheme.unselectedColour, width: 1),
+                border: Border.all(color: AppTheme.unselectedTextColour, width: 1),
               ),
             ),
             if (_description.isNotEmpty)
@@ -618,7 +642,7 @@ class SearchResultState extends State<SearchResult> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(75, 10, 75, 10),
+              padding: const EdgeInsets.fromLTRB(75, 5, 75, 10),
               child: SvgPicture.string(
                 _svgBarcode,
                 color: AppTheme.textColour,

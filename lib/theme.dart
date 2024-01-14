@@ -187,7 +187,7 @@ class SearchIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(5, 2.5, 5, 2.5),
+      padding: const EdgeInsets.fromLTRB(2, 5, 2, 5),
       child: FilledButton(
         onPressed: () {
           launch(link);
