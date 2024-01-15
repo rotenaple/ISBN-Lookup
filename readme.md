@@ -12,4 +12,5 @@ ISBN Lookup is an intuitive and user-friendly Flutter application designed to si
 
 ## Screenshots
 
-![App Demo](demo/screenshot.png)
+![Screenshots in Light Mode](demo/screenshot-light.png)
+![Screenshots in Dark Mode](demo/screenshot-dark.png)

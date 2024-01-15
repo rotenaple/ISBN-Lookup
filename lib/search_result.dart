@@ -392,7 +392,7 @@ class SearchResultState extends State<SearchResult> {
             ),
             Text(
               "Loading",
-              style: TextStyle(color: AppTheme.textColour),
+              style: AppTheme.normalTextStyle,
             ),
           ],
         ),
