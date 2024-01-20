@@ -1,21 +1,21 @@
-import 'package:barcode/barcode.dart';
-import 'package:csv/csv.dart';
+import 'dart:convert';
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'dart:convert';
+import 'package:barcode/barcode.dart';
 import 'package:http/http.dart' as http;
-import 'package:isbnsearch_flutter/barcode_search.dart';
-import 'package:isbnsearch_flutter/settings_page.dart';
-import 'package:isbnsearch_flutter/theme.dart';
-import 'dart:ui';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:html/dom.dart' as dom;
+
+import 'barcode_search.dart';
+import 'book_data.dart';
 import 'format_date.dart';
 import 'isbn_check.dart';
+import 'theme.dart';
 import 'title_case_converter.dart';
-import 'package:html/dom.dart' as dom;
+import 'settings_page.dart';
 
 String extractTextContent(dom.Element? element) {
   if (element == null) {
@@ -78,26 +78,21 @@ class SearchResultState extends State<SearchResult> {
     _isbn = isbn;
     String isbn13 = "";
 
-    if (_isbn.length == 10) {
-      isbn13 = IsbnCheck().convertIsbn10ToIsbn13(_isbn);
-
-      await openLibraryLookup(_isbn);
-      await googleBooksAPILookup(_isbn);
-      await abeBooksAPILookup(_isbn);
-
-      //await oclcClassifyLookup(isbn13);
-      await openLibraryLookup(isbn13);
-      await googleBooksAPILookup(isbn13);
-      await abeBooksAPILookup(isbn13);
-    } else if (_isbn.length == 13) {
-      //await oclcClassifyLookup(_isbn);
-      await openLibraryLookup(_isbn);
-      await googleBooksAPILookup(_isbn);
-      await abeBooksAPILookup(_isbn);
-    } else {
+    if (_isbn.length != 10 && _isbn.length != 13) {
       ScaffoldMessenger.of(context)
           .showSnackBar(AppTheme.customSnackbar('Invalid ISBN'));
       return;
+    }
+
+    await openLibraryLookup(_isbn);
+    if (!kDebugMode) {await googleBooksAPILookup(_isbn);}
+    await abeBooksAPILookup(_isbn);
+
+    if (_isbn.length == 10) {
+      isbn13 = IsbnCheck().convertIsbn10ToIsbn13(_isbn);
+      await openLibraryLookup(isbn13);
+      if (!kDebugMode) {await googleBooksAPILookup(isbn13);}
+      await abeBooksAPILookup(isbn13);
     }
 
     _title = TitleCaseConverter.convertToTitleCase(_title);
@@ -106,6 +101,7 @@ class SearchResultState extends State<SearchResult> {
 
     if (isbn13 != "") {
       _isbn = isbn13;
+      //set _isbn to the 13-digit version
     }
 
     final svgBarcode = Barcode.isbn()
@@ -115,7 +111,9 @@ class SearchResultState extends State<SearchResult> {
     ExtractYear extractYear = ExtractYear();
     _publicationYear = extractYear.extract(_publicationYear);
 
-    writeToCsv(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
+    //BookRecordsManager().writeBookRecords(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
+    BookRecord newRecord = BookRecord(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
+    BookRecordsManager().writeBookRecords(newRecord);
 
     setState(() {});
     _isLoading = false;
@@ -286,65 +284,6 @@ class SearchResultState extends State<SearchResult> {
         print('AbeBooks API lookup failed');
       }
     }
-  }
-
-  Future<List<List<dynamic>>> readCSVFile() async {
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      final filePath = '${directory.path}/output.csv';
-      final file = File(filePath);
-      final csvData = await file.readAsString();
-      final csvList = const CsvToListConverter().convert(csvData);
-      return csvList;
-    } catch (e) {
-      return [];
-    }
-  }
-
-  Future<void> initCsv() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/output.csv';
-    final file = File(filePath);
-    final exists = await file.exists();
-    if (!exists) {
-      await file.create(); // Create a blank file without writing any content.
-    }
-  }
-
-  Future<void> writeToCsv(String isbn, String title, String authors,
-      String publisher, String publicationYear, String ddc) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/output.csv';
-    final file = File(filePath);
-    final exists = await file.exists();
-    if (!exists) {
-      await initCsv();
-    }
-
-    // Check if the current ISBN is a duplicate
-    final lines = await file.readAsLines();
-    for (String line in lines) {
-      final fields = line.split(',');
-      if (fields.isNotEmpty && fields[0] == isbn) {
-        if (kDebugMode) {
-          print('Duplicate ISBN. Not writing to CSV.');
-        }
-        return;
-      }
-    }
-    var replaceTo = '';
-
-    final row = [
-      isbn.replaceAll(',', replaceTo),
-      title.replaceAll(',', replaceTo),
-      authors.replaceAll(',', replaceTo),
-      publisher.replaceAll(',', replaceTo),
-      publicationYear.replaceAll(',', replaceTo),
-      ddc.replaceAll(',', replaceTo)
-    ];
-    final csvString = const ListToCsvConverter().convert([row]);
-    final csvLine = '$csvString\n';
-    await file.writeAsString(csvLine, mode: FileMode.append);
   }
 
   @override

@@ -1,12 +1,13 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:isbnsearch_flutter/theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:isbnsearch_flutter/isbn_check.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'isbn_check.dart';
 import 'search_result.dart';
+import 'theme.dart';
 
 class BarcodeSearch extends StatefulWidget {
   const BarcodeSearch({super.key});

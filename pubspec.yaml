@@ -49,6 +49,10 @@ dependencies:
   web_scraper: ^0.1.4
   barcode: ^2.2.4
   shared_preferences: ^2.1.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  build_runner: ^2.4.8
+  hive_generator: ^2.0.1
 
 dev_dependencies:
   flutter_test:

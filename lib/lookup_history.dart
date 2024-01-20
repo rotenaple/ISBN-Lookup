@@ -1,21 +1,19 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:isbnsearch_flutter/theme.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 
-var printed = false;
+import 'book_data.dart';
+import 'theme.dart';
 
 class LookupHistoryPage extends StatefulWidget {
-  const LookupHistoryPage({Key? key});
+  const LookupHistoryPage({Key? key}) : super(key: key);
 
   @override
   _LookupHistoryPageState createState() => _LookupHistoryPageState();
 }
 
 class _LookupHistoryPageState extends State<LookupHistoryPage> {
-  List<String> csvData = [];
+  final BookRecordsManager logic = BookRecordsManager();
+  List<BookRecord> records = [];
 
   @override
   void initState() {
@@ -23,45 +21,11 @@ class _LookupHistoryPageState extends State<LookupHistoryPage> {
     refreshPage();
   }
 
-  Future<List<String>> readCSVFile() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/output.csv';
-    final file = File(filePath);
-    final exists = await file.exists();
-
-    if (!exists) {
-      return []; // Return an empty list to indicate no records yet
-    }
-
-    try {
-      final csvData = await file.readAsString();
-      final lines = csvData.split('\n');
-      if (kDebugMode) {
-        if (!printed) {
-          print(csvData);
-        }
-      }
-      return lines; // Return a List<String> instead of joining with line breaks
-    } catch (e) {
-      return []; // Return an empty list if an error occurs
-    }
-  }
-
-  void copyBookInformationToClipboard(BuildContext context, String title,
-      String author, String publisher, String isbn) {
-    final bookInfo =
-        '$title\nAuthor: $author\nPublisher: $publisher\nISBN: $isbn';
-    Clipboard.setData(ClipboardData(text: bookInfo));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Book information copied')),
-    );
-  }
-
   Future<void> refreshPage() async {
-    final data = await readCSVFile();
+    var data = await logic.fetchBookRecords();
     setState(() {
-      csvData = data;
+      records = data;
     });
-    printed = false;
   }
 
   @override
@@ -72,74 +36,12 @@ class _LookupHistoryPageState extends State<LookupHistoryPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
-              child: Container(
-                color: Colors.transparent,
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                child: Text(
-                  'Lookup History',
-                  style: AppTheme.h1,
-                ),
-              ),
-            ),
+            HeaderWidget(),
             Expanded(
-              child: FutureBuilder<List<String>>(
-                future: readCSVFile(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.hasData) {
-                    final csvData = snapshot.data!;
-
-                    if (csvData.isEmpty ||
-                        csvData.every((line) => line.trim().isEmpty)) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'No records yet',
-                              style: AppTheme.h2,
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      itemCount: csvData.length - 1,
-                      itemBuilder: (context, index) {
-                        final row = csvData[index].split(',');
-                        final isbn = row[0];
-                        final title = row[1];
-                        final author = row[2];
-                        final publisher = row[3];
-                        final pubYear = row[4];
-                        final dewey = row[5];
-
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                          child: buildLookupRecordCard(title, author, publisher, isbn, dewey, pubYear),
-                        );
-                      },
-                    );
-                  } else {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Failed to load the CSV file.',
-                            style: AppTheme.h2,
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
-                    );
-                  }
+              child: dataList(
+                dataFuture: logic.fetchBookRecords(),
+                onRefresh: () {
+                  refreshPage();
                 },
               ),
             ),
@@ -148,63 +50,91 @@ class _LookupHistoryPageState extends State<LookupHistoryPage> {
       ),
     );
   }
+}
 
-  Future<void> deleteRowFromCSV(String isbn) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/output.csv';
-    final file = File(filePath);
-    final exists = await file.exists();
+class HeaderWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+      child: Text('Lookup History', style: AppTheme.h1),
+    );
+  }
+}
 
-    if (!exists) {
-      return;
-    }
+class dataList extends StatelessWidget {
+  final Future<List<BookRecord>> dataFuture;
+  final VoidCallback onRefresh;
 
-    try {
-      final csvData = await file.readAsLines();
+  const dataList(
+      {Key? key, required this.dataFuture, required this.onRefresh})
+      : super(key: key);
 
-      // Find the index of the row to be deleted
-      final index = csvData.indexWhere((line) => line.split(',')[0] == isbn);
-
-      if (index != -1) {
-        // Remove the row at the found index, including the line break
-        csvData.removeAt(index);
-
-        // Join the updated CSV data back into a string
-        final updatedCsvString = '${csvData.join('\n')}\n';
-
-        // Write the updated CSV string back to the file
-        await file.writeAsString(updatedCsvString);
-
-        // Refresh the page
-        refreshPage();
-      }
-    } catch (e) {
-      print('Failed to delete row from CSV: $e');
-    }
+  void _deleteRecord(BuildContext context, String isbn) async {
+    await BookRecordsManager().deleteBookRecords(isbn);
+    onRefresh();
   }
 
-  Widget buildLookupRecordCard(title, author, publisher, isbn, dewey, pubYear) {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<BookRecord>>(
+      future: dataFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasData) {
+          final records = snapshot.data!;
+          return records.isEmpty
+              ? Center(child: Text('No records yet', style: AppTheme.h2))
+              : ListView.builder(
+                  itemCount: records.length,
+                  itemBuilder: (context, index) {
+                    return LookupRecordCard(
+                      record: records[index],
+                      onDelete: () =>
+                          _deleteRecord(context, records[index].isbn),
+                    );
+                  },
+                );
+        } else {
+          return Center(
+              child: Text('Failed to read database.', style: AppTheme.h2));
+        }
+      },
+    );
+  }
+}
+
+class LookupRecordCard extends StatelessWidget {
+  final BookRecord record;
+  final VoidCallback onDelete;
+
+  const LookupRecordCard(
+      {Key? key, required this.record, required this.onDelete})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       color: AppTheme.altBackgroundColour,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
         child: ListTile(
-          title: _buildTitleText(title),
-          subtitle: _buildSubtitle(author, publisher, isbn, dewey, pubYear),
-          trailing: _buildActionButtons(context, title, author, publisher, isbn),
+          title: _buildTitleText(record.title),
+          subtitle: _buildSubtitle(record.author, record.publisher, record.isbn,
+              record.dewey, record.pubYear),
+          trailing: _buildActionButtons(context, record),
         ),
       ),
     );
   }
 
   Widget _buildTitleText(String title) {
-    return Text(
-      title,
-      style: AppTheme.boldTextStyle,
-    );
+    return Text(title, style: AppTheme.boldTextStyle);
   }
 
-  Widget _buildSubtitle(String author, String publisher, String isbn, String dewey, String pubYear) {
+  Widget _buildSubtitle(String author, String publisher, String isbn,
+      String dewey, String pubYear) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -223,7 +153,9 @@ class _LookupHistoryPageState extends State<LookupHistoryPage> {
 
   Widget _buildPublisherYearText(String publisher, String pubYear) {
     return Text(
-      publisher.isNotEmpty && pubYear.isNotEmpty ? '$publisher $pubYear' : '$publisher$pubYear',
+      publisher.isNotEmpty && pubYear.isNotEmpty
+          ? '$publisher $pubYear'
+          : '$publisher$pubYear',
       style: AppTheme.normalTextStyle,
     );
   }
@@ -232,12 +164,14 @@ class _LookupHistoryPageState extends State<LookupHistoryPage> {
     return Text('$isbn $dewey', style: AppTheme.normalTextStyle);
   }
 
-  Row _buildActionButtons(BuildContext context, String title, String author, String publisher, String isbn) {
+  Row _buildActionButtons(BuildContext context, BookRecord record) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildIconButton(Icons.copy, () => copyBookInformationToClipboard(context, title, author, publisher, isbn)),
-        _buildIconButton(Icons.delete, () => _showDeleteDialog(context, isbn)),
+        _buildIconButton(
+            Icons.copy, () => copyBookInformationToClipboard(context, record)),
+        _buildIconButton(
+            Icons.delete, () => _showDeleteDialog(context, record.isbn)),
       ],
     );
   }
@@ -255,90 +189,29 @@ class _LookupHistoryPageState extends State<LookupHistoryPage> {
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.altBackgroundColour,
         title: Text("Delete Record", style: AppTheme.boldTextStyle),
-        content: Text('Are you sure you want to delete this record?', style: AppTheme.dialogContentStyle),
+        content: Text('Are you sure you want to delete this record?',
+            style: AppTheme.dialogContentStyle),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel', style: AppTheme.dialogButtonStyle)),
-          ElevatedButton(onPressed: () { Navigator.pop(context); deleteRowFromCSV(isbn); }, style: AppTheme.filledWarningButtonStyle, child: const Text('Delete')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel', style: AppTheme.dialogButtonStyle)),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                onDelete();
+              },
+              style: AppTheme.filledWarningButtonStyle,
+              child: const Text('Delete')),
         ],
       ),
     );
   }
 
-}
-
-class HeaderWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
-      child: Text(
-        'Lookup History',
-        style: AppTheme.h1,
-      ),
-    );
-  }
-}
-
-class CSVDataList extends StatelessWidget {
-  final Future<List<String>> csvDataFuture;
-
-  const CSVDataList({super.key, required this.csvDataFuture});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<String>>(
-      future: csvDataFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasData) {
-          final csvData = snapshot.data!;
-          return _buildCSVDataView(csvData, context);
-        } else {
-          return _buildErrorView();
-        }
-      },
-    );
-  }
-
-  Widget _buildCSVDataView(List<String> csvData, BuildContext context) {
-    if (csvData.isEmpty || csvData.every((line) => line.trim().isEmpty)) {
-      return Center(
-        child: Text('No records yet', style: AppTheme.h2),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: csvData.length - 1,
-      itemBuilder: (context, index) {
-        return CSVItem(row: csvData[index].split(','));
-      },
-    );
-  }
-
-  Widget _buildErrorView() {
-    return Center(
-      child: Text('Failed to load the CSV file.', style: AppTheme.h2),
-    );
-  }
-}
-
-class CSVItem extends StatelessWidget {
-  final List<String> row;
-
-  const CSVItem({super.key, required this.row});
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-      child: Card(
-        color: AppTheme.altBackgroundColour,
-        child: const ListTile(
-          // ... rest of the ListTile code ...
-        ),
-      ),
-    );
+  void copyBookInformationToClipboard(BuildContext context, BookRecord record) {
+    final bookInfo =
+        '${record.title}\nAuthor: ${record.author}\nPublisher: ${record.publisher}\nISBN: ${record.isbn}';
+    Clipboard.setData(ClipboardData(text: bookInfo));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Book information copied')));
   }
 }

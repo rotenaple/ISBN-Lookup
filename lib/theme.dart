@@ -1,9 +1,7 @@
-// ignore_for_file: prefer_const_constructors_in_immutables
-
-
 import 'package:flutter/material.dart';
-import 'package:isbnsearch_flutter/settings_page.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'settings_page.dart';
 
 class AppTheme {
   static bool get darkMode => SharedPrefs().isDarkModeEnabled;

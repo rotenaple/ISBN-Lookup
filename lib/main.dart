@@ -1,16 +1,27 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:isbnsearch_flutter/settings_page.dart';
-import 'isbn_check.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
+
 import 'barcode_search.dart';
-import 'search_result.dart';
-import 'lookup_history.dart';
+import 'book_data.dart';
 import 'custom_keyboard.dart';
 import 'desktop_keyboard.dart';
+import 'isbn_check.dart';
+import 'lookup_history.dart';
+import 'search_result.dart';
+import 'settings_page.dart';
 import 'theme.dart';
 
-void main() => runApp(const MaterialApp(home: Home()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final appDocumentDirectory = await getApplicationDocumentsDirectory();
+  Hive.init(appDocumentDirectory.path);
+  Hive.registerAdapter(BookRecordAdapter()); // Register your adapter
+  runApp(const MaterialApp(home: Home()));
+}
 
 class Home extends StatefulWidget {
   const Home({super.key});
