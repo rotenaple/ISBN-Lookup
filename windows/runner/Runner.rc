@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "isbn_book_search_test_flutter" "\0"
+            VALUE "FileDescription", "isbn_lookup" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "isbn_book_search_test_flutter" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "isbn_book_search_test_flutter.exe" "\0"
-            VALUE "ProductName", "isbn_book_search_test_flutter" "\0"
+            VALUE "InternalName", "isbn_lookup" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
+            VALUE "OriginalFilename", "isbn_lookup.exe" "\0"
+            VALUE "ProductName", "isbn_lookup" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

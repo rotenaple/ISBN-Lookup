@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'dart:ui';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:barcode/barcode.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:html/dom.dart' as dom;
 
@@ -56,6 +59,7 @@ class SearchResultState extends State<SearchResult> {
   bool _isLoading = true;
   String customSearchName = "";
   String customSearchDomain = "";
+  String localFilePath = "";
 
   @override
   void initState() {
@@ -84,14 +88,18 @@ class SearchResultState extends State<SearchResult> {
       return;
     }
 
-    await openLibraryLookup(_isbn);
-    if (!kDebugMode) {await googleBooksAPILookup(_isbn);}
+    await openLibraryAPILookup(_isbn);
+    if (!kDebugMode) {
+      await googleBooksAPILookup(_isbn);
+    }
     await abeBooksAPILookup(_isbn);
 
     if (_isbn.length == 10) {
       isbn13 = IsbnCheck().convertIsbn10ToIsbn13(_isbn);
-      await openLibraryLookup(isbn13);
-      if (!kDebugMode) {await googleBooksAPILookup(isbn13);}
+      await openLibraryAPILookup(isbn13);
+      if (!kDebugMode) {
+        await googleBooksAPILookup(isbn13);
+      }
       await abeBooksAPILookup(isbn13);
     }
 
@@ -111,10 +119,11 @@ class SearchResultState extends State<SearchResult> {
     ExtractYear extractYear = ExtractYear();
     _publicationYear = extractYear.extract(_publicationYear);
 
-    //BookRecordsManager().writeBookRecords(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
-    BookRecord newRecord = BookRecord(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
+    BookRecord newRecord =
+        BookRecord(_isbn, _title, _authors, _publisher, _publicationYear, _ddc);
     BookRecordsManager().writeBookRecords(newRecord);
 
+    await downloadCoverImage(_coverlink, _isbn);
     setState(() {});
     _isLoading = false;
   }
@@ -135,7 +144,7 @@ class SearchResultState extends State<SearchResult> {
     return buffer.toString();
   }
 
-  Future<void> openLibraryLookup(String isbn) async {
+  Future<void> openLibraryAPILookup(String isbn) async {
     String url = "https://openlibrary.org/isbn/$isbn.json";
     http.Response response = await http.get(Uri.parse(url));
 
@@ -286,28 +295,74 @@ class SearchResultState extends State<SearchResult> {
     }
   }
 
+  Future<void> downloadCoverImage(String imageUrl, String isbn) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final coverImgDir = Directory('${directory.path}/coverImg');
+
+      // Ensure the directory exists
+      if (!await coverImgDir.exists()) {
+        await coverImgDir.create(recursive: true);
+      }
+
+      localFilePath = '${coverImgDir.path}/$isbn.jpg';
+      final file = File(localFilePath);
+
+      if (!await file.exists()) {
+        final response = await http.get(Uri.parse(imageUrl));
+
+        if (response.statusCode == 200) {
+          img.Image? image = img.decodeImage(response.bodyBytes);
+          var jpg = img.encodeJpg(image!, quality: 85);
+          await file.writeAsBytes(jpg);
+
+          if (kDebugMode) {
+            print(
+                'Image downloaded, converted, and compressed to JPG at $localFilePath');
+          }
+        } else {
+          if (kDebugMode) {
+            print('Failed to download the image: ${response.statusCode}');
+          }
+        }
+      } else {
+        if (kDebugMode) {
+          print('Image already exists at $localFilePath');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('An error occurred: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
 
     Widget content = isLandscape
-        ? Row(children: buildChildren(isLandscape))
-        : Column(children: buildChildren(isLandscape));
+        ? Row(children: buildChildren(isLandscape, localFilePath))
+        : Column(children: buildChildren(isLandscape, localFilePath));
 
-    return _isLoading ? _buildLoading() : Scaffold(
-      backgroundColor: AppTheme.backgroundColour,
-      body: SafeArea(
-        child: content,
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppTheme.primaryColour,
-        onPressed: () {
-          BarcodeSearchState.isScanning = false;
-          Navigator.pop(context);
-        },
-        child: Icon(Icons.arrow_back, color: AppTheme.altBackgroundColourLight),
-      ),
-    );
+    return _isLoading
+        ? _buildLoading()
+        : Scaffold(
+            backgroundColor: AppTheme.backgroundColour,
+            body: SafeArea(
+              child: content,
+            ),
+            floatingActionButton: FloatingActionButton(
+              backgroundColor: AppTheme.primaryColour,
+              onPressed: () {
+                BarcodeSearchState.isScanning = false;
+                Navigator.pop(context);
+              },
+              child: Icon(Icons.arrow_back,
+                  color: AppTheme.altBackgroundColourLight),
+            ),
+          );
   }
 
   Widget _buildLoading() {
@@ -339,28 +394,51 @@ class SearchResultState extends State<SearchResult> {
     );
   }
 
-  List<Widget> buildChildren(bool isLandscape) {
+  List<Widget> buildChildren(bool isLandscape, String localFilePath) {
     List<Widget> children = [];
-    if (_coverlink.isNotEmpty) {
-      children.add(
-        Expanded(
-          flex: 5,
-          child: buildImageBlock(isLandscape),
-        ),
-      );
-    }
-    if (_title.isNotEmpty) {
-      children.add(
-        Expanded(
-          flex: 12,
-          child: buildTextBlock(),
-        ),
-      );
-    }
+
+    children.add(
+      Expanded(
+        flex: 5,
+        child: buildImageBlock(context, isLandscape, localFilePath),
+      ),
+    );
+    children.add(
+      Expanded(
+        flex: 12,
+        child: buildTextBlock(),
+      ),
+    );
+
     return children;
   }
 
-  Widget buildImageBlock(bool isLandscape) {
+  Widget buildImageBlock(BuildContext context, bool isLandscape, String localFilePath) {
+    return FutureBuilder(
+      future: File(localFilePath).exists(),
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.data == true) {
+            return buildImageStack(context, isLandscape, localFilePath);
+          } else {
+            return Container(
+              color: AppTheme.altBackgroundColour,
+              alignment: Alignment.center,
+              child: Text(
+                'Cover Image Not Available',
+                style: AppTheme.h1,
+              ),
+            );
+          }
+        } else {
+          // While checking file existence, show loading spinner
+          return Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+
+  Widget buildImageStack(BuildContext context, bool isLandscape, String localFilePath) {
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -370,8 +448,8 @@ class SearchResultState extends State<SearchResult> {
               Colors.black.withOpacity(0.5),
               BlendMode.darken,
             ),
-            child: Image.network(
-              _coverlink,
+            child: Image.file(
+              File(localFilePath),
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
               fit: isLandscape ? BoxFit.fitHeight : BoxFit.fitWidth,
@@ -381,8 +459,8 @@ class SearchResultState extends State<SearchResult> {
         Align(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-            child: Image.network(
-              _coverlink,
+            child: Image.file(
+              File(localFilePath),
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
               fit: BoxFit.contain,
@@ -392,6 +470,7 @@ class SearchResultState extends State<SearchResult> {
       ],
     );
   }
+
 
   Widget buildTextBlock() {
     return SingleChildScrollView(
@@ -445,7 +524,8 @@ class SearchResultState extends State<SearchResult> {
               decoration: BoxDecoration(
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.zero,
-                border: Border.all(color: AppTheme.unselectedTextColour, width: 1),
+                border:
+                    Border.all(color: AppTheme.unselectedTextColour, width: 1),
               ),
             ),
             if (_description.isNotEmpty)

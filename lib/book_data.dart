@@ -16,22 +16,34 @@ class BookRecordsManager {
 
   Future<List<BookRecord>> fetchBookRecords() async {
     final box = await Hive.openBox<BookRecord>(_boxName);
-    return box.values.toList();
+    var records = box.values.toList();
+    records.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return records;
   }
 
   Future<void> writeBookRecords(BookRecord bookRecord) async {
     final box = await Hive.openBox<BookRecord>(_boxName);
 
-    // Check if the current ISBN is a duplicate
-    if (box.values.any((record) => record.isbn == bookRecord.isbn)) {
-      if (kDebugMode) {
-        print('Duplicate ISBN. Not writing to DB.');
-      }
-      return;
-    }
+    var existingRecord = box.get(bookRecord.isbn);
 
-    await box.put(bookRecord.isbn, bookRecord);
+    if (existingRecord != null) {
+      var updatedRecord = BookRecord(
+        bookRecord.isbn,
+        bookRecord.title ?? existingRecord.title,
+        bookRecord.author ?? existingRecord.author,
+        bookRecord.publisher ?? existingRecord.publisher,
+        bookRecord.pubYear ?? existingRecord.pubYear,
+        bookRecord.dewey ?? existingRecord.dewey,
+        timestamp: DateTime.now(),
+      );
+      await box.put(bookRecord.isbn, updatedRecord);
+      if (kDebugMode) {print('Record with ISBN ${bookRecord.isbn} updated.');}
+    } else {
+      if (kDebugMode) {print('Record with ISBN ${bookRecord.isbn} inserted.');}
+      await box.put(bookRecord.isbn, bookRecord);
+    }
   }
+
 
   Future<void> deleteBookRecords(String isbn) async {
     final box = await Hive.openBox<BookRecord>(_boxName);
@@ -59,5 +71,9 @@ class BookRecord extends HiveObject {
   @HiveField(5)
   final String dewey;
 
-  BookRecord(this.isbn, this.title, this.author, this.publisher, this.pubYear, this.dewey);
+  @HiveField(6)
+  final DateTime timestamp;
+
+  BookRecord(this.isbn, this.title, this.author, this.publisher, this.pubYear, this.dewey, {DateTime? timestamp})
+      : this.timestamp = timestamp ?? DateTime.now();
 }

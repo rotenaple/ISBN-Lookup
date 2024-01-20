@@ -23,13 +23,14 @@ class BookRecordAdapter extends TypeAdapter<BookRecord> {
       fields[3] as String,
       fields[4] as String,
       fields[5] as String,
+      timestamp: fields[6] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, BookRecord obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.isbn)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class BookRecordAdapter extends TypeAdapter<BookRecord> {
       ..writeByte(4)
       ..write(obj.pubYear)
       ..writeByte(5)
-      ..write(obj.dewey);
+      ..write(obj.dewey)
+      ..writeByte(6)
+      ..write(obj.timestamp);
   }
 
   @override

@@ -53,6 +53,7 @@ dependencies:
   hive_flutter: ^1.1.0
   build_runner: ^2.4.8
   hive_generator: ^2.0.1
+  image: ^4.1.4
 
 dev_dependencies:
   flutter_test:
