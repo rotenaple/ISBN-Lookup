@@ -9,6 +9,18 @@ ISBN Lookup is an intuitive and user-friendly Flutter application designed to si
 - Search History: Keeps track of your previous searches, allowing easy access to past queries.
 - Customisable Settings (coming soon): Tailor the app to your preferences, enhancing your search experience.
 
+## Download
+The font can be downloaded [here](https://github.com/rotenaple/ISBN-Lookup/releases/latest).
+
+### License
+This app is licensed under the MIT License, a very permissive open source license. This means you can:
+
+- Use the app for any purpose, including commercial projects.
+- Modify the app and redistribute it.
+
+Just remember to include the original copyright notice and license terms when redistributing.
+
+
 ## Screenshots
 
 ![Screenshots in Light Mode](demo/screenshot-light.png)
